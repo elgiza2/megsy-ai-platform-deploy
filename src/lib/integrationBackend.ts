@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Integration } from "@/lib/integrationsData";
+import { listToolApps } from "@/lib/pipedream/client";
 
 export type IntegrationMeta = Record<string, any>;
 
@@ -79,6 +80,24 @@ export async function loadIntegrationConnections(
       connectedApps[integration.app] = true;
       appMeta[integration.app] = account;
     }
+  }
+
+  // The chat composer uses the tool gateway as its authoritative source for
+  // connected apps. Reconcile it here as well so the integrations sheet and
+  // the chat cannot disagree (Gmail used to appear connected in the composer
+  // while its detail page still showed "Not connected").
+  try {
+    const tools = await listToolApps();
+    for (const app of tools.apps ?? []) {
+      if (!app?.app) continue;
+      connectedApps[app.app] = true;
+      appMeta[app.app] = {
+        ...app,
+        account_name: app.account_name ?? undefined,
+      };
+    }
+  } catch {
+    // The existing provider reads remain usable if the tool gateway is down.
   }
 
   if (userIntegrations.status === "fulfilled" && !userIntegrations.value.error && userIntegrations.value.data) {
