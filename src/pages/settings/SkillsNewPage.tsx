@@ -39,7 +39,7 @@ export default function SkillsNewPage() {
     <SubShell
       title="New skill"
       subtitle="Describe the role and Megsy will draft it in seconds."
-      backTo="/settings/skills"
+      backTo="/chat"
     >
       <SubSection title="Describe the expert" description="One or two sentences is enough — you can refine everything after.">
         <div className="relative rounded-[14px] bg-[var(--mn-card)]">

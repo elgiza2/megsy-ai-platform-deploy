@@ -299,7 +299,7 @@ export default function MobileAuthIntro({
                 style={{ overflow: "hidden" }}
               >
                 <div
-                  className="rounded-full px-5 h-[54px] flex items-center gap-2"
+                  className="rounded-[10px] px-5 h-[54px] flex items-center gap-2"
                   style={{
                     background: "var(--overlay-white-06)",
                     border: "1px solid var(--overlay-white-14)",

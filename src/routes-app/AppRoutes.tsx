@@ -165,6 +165,8 @@ export const AppRoutes = ({ currentUserId }: { currentUserId: string | null }) =
     <Route path="/test/desktop-bridge" element={<ProtectedRoute><DesktopBridgePage /></ProtectedRoute>} />
     <Route path="/settings/desktop-bridge" element={<ProtectedRoute><DesktopBridgePage /></ProtectedRoute>} />
     <Route path="/settings/system-status" element={<ProtectedRoute><SystemStatusPage /></ProtectedRoute>} />
+    {/* Keep the settings destination compatible with older mobile links. */}
+    <Route path="/settings/integrations" element={<Navigate to="/chat?integrations=1" replace />} />
 
     {/* ── Research previews ─────────────────────────────────── */}
     <Route path="/research/preview/new" element={<ProtectedRoute><ResearchPreviewPage /></ProtectedRoute>} />

@@ -311,6 +311,7 @@ export default function SkillsSettingsPage() {
     <SubShell
       title="Skills"
       subtitle="Experts Megsy calls automatically inside chat."
+      backTo="/chat"
       action={
         <SkillsAddMenu
           onCreateWithMegsy={() => navigate("/settings/skills/new")}

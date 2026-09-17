@@ -56,7 +56,7 @@ export default function SkillsLibraryPage() {
     <SubShell
       title="Official library"
       subtitle="Ready-made skills maintained by Megsy."
-      backTo="/settings/skills"
+      backTo="/chat"
     >
       <div className="flex items-center gap-2 h-11 px-4 rounded-[14px] bg-[var(--mn-card)]">
         <Search className="w-4 h-4 text-[color:var(--mn-muted)] shrink-0" />

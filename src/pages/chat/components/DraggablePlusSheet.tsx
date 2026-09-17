@@ -260,7 +260,7 @@ export const DraggablePlusSheet = ({
       onWheel={(e) => {
         if (e.deltaY > 0 && !expandedRef.current) snapTo("expanded");
       }}
-      className={`mobile-plus-glass-menu fixed bottom-0 left-0 right-0 z-overlay flex flex-col rounded-t-[22px] bg-background outline-none will-change-transform ${
+      className={`mobile-plus-glass-menu fixed bottom-0 left-0 right-0 z-[60] flex min-w-0 max-w-[100vw] flex-col overflow-x-hidden rounded-t-[22px] bg-background outline-none will-change-transform ${
         sheetKind === "integrations"
           ? "md:mx-auto md:max-w-[640px] md:rounded-t-[24px]"
           : "md:hidden"

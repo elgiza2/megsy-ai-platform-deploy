@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getCachedUser } from "@/lib/cachedUser";
 import { integrations, type Integration } from "@/lib/integrationsData";
+import { loadIntegrationConnections } from "@/lib/integrationBackend";
 
 export interface ConnectedApp {
   app: string;
@@ -27,7 +28,11 @@ export function useConnectedApps() {
         const user = auth?.user;
         if (!user) return;
 
-        const [composio, local] = await Promise.allSettled([
+        const [snapshot, composio, local] = await Promise.allSettled([
+          // Pipedream accounts are the source of truth for Gmail and most
+          // first-party app connections. The composer previously omitted this
+          // source and therefore showed Gmail as disconnected after OAuth.
+          loadIntegrationConnections(integrations),
           supabase
             .from("composio_connections")
             .select("app_slug,status")
@@ -40,6 +45,11 @@ export function useConnectedApps() {
         ]);
 
         const slugs: string[] = [];
+        if (snapshot.status === "fulfilled") {
+          for (const [app, isConnected] of Object.entries(snapshot.value.connectedApps)) {
+            if (isConnected) slugs.push(app);
+          }
+        }
         if (composio.status === "fulfilled" && Array.isArray(composio.value.data)) {
           for (const row of composio.value.data as any[]) {
             if (row?.app_slug && row.status !== "disconnected") slugs.push(String(row.app_slug));

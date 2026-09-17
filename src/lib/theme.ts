@@ -62,12 +62,25 @@ export const applyTheme = (mode: ThemeMode = getStoredTheme()): "light" | "dark"
 };
 
 export const setTheme = (mode: ThemeMode): void => {
+  const html = document.documentElement;
+  const previousTheme = html.getAttribute("data-theme") === "dark" ? "dark" : "light";
   try {
     localStorage.setItem(THEME_STORAGE_KEY, mode);
   } catch {
     /* storage disabled — still apply for this session */
   }
+  // Apply the new tokens immediately, then let the old surface recede from
+  // the edges toward the centre. This keeps the whole app calm instead of
+  // flashing each component independently.
+  html.dataset.themeTransitionFrom = previousTheme;
+  html.classList.remove("theme-transitioning");
+  void html.offsetWidth;
   applyTheme(mode);
+  html.classList.add("theme-transitioning");
+  window.setTimeout(() => {
+    html.classList.remove("theme-transitioning");
+    delete html.dataset.themeTransitionFrom;
+  }, 680);
   window.dispatchEvent(new CustomEvent("megsy:theme", { detail: mode }));
 };
 

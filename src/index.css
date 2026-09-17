@@ -8,6 +8,31 @@
 @import "./styles/page-transitions.css";
 @import "./styles/landing-typography.css";
 
+/* Theme changes are painted as one calm surface: the previous palette
+   recedes from the edges toward the centre after the new tokens are applied. */
+html.theme-transitioning::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  pointer-events: none;
+  background: #f7f7f5;
+  animation: megsy-theme-edges-to-centre 640ms cubic-bezier(0.22, 0.8, 0.25, 1) forwards;
+}
+
+html[data-theme-transition-from="dark"].theme-transitioning::before {
+  background: #0b0c0e;
+}
+
+@keyframes megsy-theme-edges-to-centre {
+  from { clip-path: inset(0 0 0 0); }
+  to { clip-path: circle(0 at 50% 50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.theme-transitioning::before { animation-duration: 1ms; }
+}
+
 
 @import "tailwindcss";
 @config "../tailwind.config.ts";
