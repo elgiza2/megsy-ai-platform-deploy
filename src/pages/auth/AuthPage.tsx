@@ -20,6 +20,7 @@ import { usePrefetchOnIdle } from "@/hooks/usePrefetchOnIdle";
 
 import { t as authT, tf as authTf, translateAuthError, useUserLang } from "@/lib/authI18n";
 import { safeInternalPath } from "@/lib/security/safeRedirect";
+import { absoluteAuthRedirect, navigateAfterAuth } from "@/lib/authNavigation";
 
 import { getMfaRedirect } from "@/lib/mfa";
 import { pathForZone } from "@/lib/zoneRouting";
@@ -279,7 +280,7 @@ const AuthPage = () => {
         navigate(mfa);
         return;
       }
-      if (redirectUrl) window.location.href = redirectUrl;
+      if (redirectUrl) navigateAfterAuth(navigate, redirectUrl, window.location.search);
       else navigate(pathForZone("/chat", window.location.pathname));
     } catch (e: any) {
       const msg = String(e?.message || "");
@@ -474,7 +475,7 @@ const AuthPage = () => {
       if (!data?.success) throw new Error(data?.error || "Invalid code");
 
       if (step === "otp-2fa") {
-        if (redirectUrl) window.location.href = redirectUrl;
+        if (redirectUrl) navigateAfterAuth(navigate, redirectUrl, window.location.search);
         else navigate(pathForZone("/chat", window.location.pathname));
       } else if (step === "otp-reset") {
         setVerifiedResetCode(code);
@@ -529,7 +530,7 @@ const AuthPage = () => {
             navigate(mfa);
             return;
           }
-          if (redirectUrl) window.location.href = redirectUrl;
+          if (redirectUrl) navigateAfterAuth(navigate, redirectUrl, window.location.search);
           else navigate(pathForZone("/chat", window.location.pathname));
           return;
         }
@@ -588,7 +589,7 @@ const AuthPage = () => {
         localStorage.removeItem("megsy_referral_code");
       } catch {}
       toast.success(authT("accountCreated"));
-      if (redirectUrl) window.location.href = redirectUrl;
+      if (redirectUrl) navigateAfterAuth(navigate, redirectUrl, window.location.search);
       else navigate(pathForZone("/chat", window.location.pathname));
     } catch (e: any) {
       toast.error(translateAuthError(e, "couldNotCreate"));
@@ -643,8 +644,10 @@ const AuthPage = () => {
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo:
-          redirectUrl || window.location.origin + pathForZone("/chat", window.location.pathname),
+        redirectTo: absoluteAuthRedirect(
+          redirectUrl || pathForZone("/chat", window.location.pathname),
+          window.location.search,
+        ),
       },
     });
   };
