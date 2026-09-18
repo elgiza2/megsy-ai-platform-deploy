@@ -4,6 +4,7 @@ import { loadMediaSettings } from "@/components/chat/mobile/MediaSettingsMenu";
 import type { Message, ChatMode } from "../chatConstants";
 import { DEFAULT_MODEL } from "@/lib/defaultModel";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/edgeRuntime";
+import { validateRunwayVideoRequest } from "@/lib/runwayModelPolicy";
 
 
 export type MediaPlan = any;
@@ -286,6 +287,14 @@ export async function runMediaTurn(args: RunMediaTurnArgs): Promise<void> {
     let plan: MediaPlan;
     const settings = loadMediaSettings(modeLocal === "video" ? "video" : "images");
     const aspectRatio = settings.aspectRatio;
+    if (modeLocal === "video" && /runway/i.test(String(modelLocal.provider || ""))) {
+      const check = validateRunwayVideoRequest(modelLocal.slug, {
+        durationSeconds: settings.duration ?? videoDurationSec,
+        quality: settings.quality,
+        audio: true,
+      });
+      if (!check.ok) throw new Error("message" in check ? check.message : "Invalid Runway video settings");
+    }
     if (isStartEnd) {
       plan = {
         mode: "video",

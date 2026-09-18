@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { MediaPlan, MediaPlanScene } from "@/components/chat/media/MediaPlanCard";
 import type { MediaSceneResult } from "@/components/chat/media/MediaResultCard";
 import { isUnlimitedMediaModel } from "@/lib/mediaQuota";
+import { getRunwayVideoPolicy } from "@/lib/runwayModelPolicy";
 
 // The image router is deployed as `anything-api` (new function dirs can't be
 // created here; the legacy `media-image` deployment ignores model_slug).
@@ -68,6 +69,9 @@ async function requestImage(
       model_slug: modelSlug,
       num_images: 1,
       aspect_ratio: aspectRatio,
+      ...( /^(?:runway[-_])?(gpt_image_2_5_flare|gpt_image_2_5_sunburst|seedream5_pro|gpt_image_2|grok_imagine_image_2|muse_image|gemini_image3\.1_flash|gen4_image_turbo)$/i.test(modelSlug)
+        ? { resolution: "1K" }
+        : {}),
       ...(refs.length > 0
         ? {
             reference_image_url: refs[0],
@@ -170,6 +174,9 @@ async function generateVideoScene(
     duration: scene.duration_seconds || 5,
     aspect_ratio: scene.aspect_ratio || aspectRatio,
   };
+  const runwayPolicy = getRunwayVideoPolicy(modelSlug);
+  if (runwayPolicy?.resolution) body.resolution = runwayPolicy.resolution;
+  if (runwayPolicy?.audio === false) body.audio = false;
   if (scene.first_frame_url) body.start_frame = scene.first_frame_url;
   if (scene.last_frame_url) body.end_frame = scene.last_frame_url;
 
@@ -324,4 +331,3 @@ export async function regenerateScene(
     };
   }
 }
-

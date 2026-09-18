@@ -21,6 +21,17 @@ export function isUnlimitedMediaModel(model: {
   return /deapi/i.test(key);
 }
 
+/** Runway images are included for paid subscribers; Runway videos remain metered. */
+export function isUnlimitedImageModel(model: {
+  slug?: string;
+  id?: string;
+  provider?: string;
+  name?: string;
+}): boolean {
+  const key = `${model?.slug || model?.id || ""} ${model?.provider || ""} ${model?.name || ""}`;
+  return /runway|gpt_image_2_5|seedream5_pro|grok_imagine_image_2|muse_image|gemini_image3\.1_flash|gen4_image_turbo/i.test(key);
+}
+
 /** Images never consume the video allowance — they are unlimited. */
 export const IMAGES_UNLIMITED = true;
 

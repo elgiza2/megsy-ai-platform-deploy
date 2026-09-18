@@ -406,17 +406,15 @@ function alibabaRowToModelDetail(r: any): ModelDetail {
 
 // Runway Dev catalogue fallback; remote model tables remain authoritative.
 const RUNWAY_VIDEO_MODELS: Array<[string, string]> = [
-  ["wan3", "Wan 3"], ["seedance2_5", "Seedance 2.5"], ["grok_imagine_1_5", "Grok Imagine 1.5"],
-  ["seedance2", "Seedance 2"], ["seedance2_fast", "Seedance 2 Fast"], ["seedance2_mini", "Seedance 2 Mini"],
-  ["h3_max", "H3 Max"], ["hailuo3", "Hailuo 3"], ["aleph2", "Aleph 2"], ["gen4.5", "Gen-4.5"],
-  ["gen4_turbo", "Gen-4 Turbo"], ["act_two", "Act-Two"], ["veo3.1", "Veo 3.1"], ["veo3.1_fast", "Veo 3.1 Fast"],
-  ["happyhorse_1_0", "HappyHorse 1.0"], ["gemini_omni_flash", "Gemini Omni Flash"],
+  ["gen4.5", "Gen-4.5"], ["veo3.1", "Veo 3.1"], ["seedance2_5", "Seedance 2.5"],
+  ["seedance2_mini", "Seedance 2.0 Mini"], ["h3_max", "MiniMax H3"],
+  ["gemini_omni_flash", "Gemini Omni Flash 1.1"],
 ];
 const RUNWAY_IMAGE_MODELS: Array<[string, string]> = [
   ["gpt_image_2_5_flare", "GPT Image 2.5 Flare"], ["gpt_image_2_5_sunburst", "GPT Image 2.5 Sunburst"],
-  ["muse_image", "Muse Image"], ["grok_imagine_image_2", "Grok Imagine Image 2"], ["seedream5_pro", "Seedream 5 Pro"],
-  ["seedream5_lite", "Seedream 5 Lite"], ["gen4_image", "Gen-4 Image"], ["gen4_image_turbo", "Gen-4 Image Turbo"],
-  ["gemini_image3_pro", "Nano Banana Pro"], ["gemini_image3.1_flash", "Nano Banana 2"], ["gpt_image_2", "GPT Image 2"], ["gemini_2.5_flash", "Nano Banana"],
+  ["seedream5_pro", "Seedream 5.0 Pro"], ["gpt_image_2", "GPT Image 2"],
+  ["grok_imagine_image_2", "Grok Imagine Image 2"], ["muse_image", "Muse Image"],
+  ["gemini_image3.1_flash", "Nano Banana 2"], ["gen4_image_turbo", "Gen-4 Image Turbo"],
 ];
 function runwayFallbackModels(): ModelDetail[] {
   const base = (slug: string, name: string, type: "image" | "video"): ModelDetail => ({

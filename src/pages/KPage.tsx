@@ -41,7 +41,7 @@ const Field = ({
   </div>
 );
 
-type Provider = "d" | "r" | "y" | "a" | "t" | "b" | "c" | "f";
+type Provider = "d" | "r" | "y" | "a" | "t" | "b" | "c" | "f" | "runway";
 
 const KPage = () => {
   const [d, setD] = useState("");
@@ -52,6 +52,7 @@ const KPage = () => {
   const [b, setB] = useState("");
   const [c, setC] = useState("");
   const [f, setF] = useState("");
+  const [w, setW] = useState("");
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState("");
   const [counts, setCounts] = useState<Record<string, number>>({});
@@ -162,6 +163,18 @@ const KPage = () => {
         </div>
         <div className="pt-2">
           <div className="mb-1.5 px-1 text-[12px] font-medium text-foreground/60">
+            Runway Dev — فيديو وصور
+          </div>
+          <Field
+            name="w"
+            value={w}
+            onChange={setW}
+            busy={busy}
+            onSubmit={() => submit("runway", w, () => setW(""))}
+          />
+        </div>
+        <div className="pt-2">
+          <div className="mb-1.5 px-1 text-[12px] font-medium text-foreground/60">
             برمجة
           </div>
           <Field
@@ -175,7 +188,7 @@ const KPage = () => {
         <div className="flex justify-between px-1 font-mono text-[11px] text-foreground/65">
           <span>
             {line("d")} · {line("r")} · {line("y")} · {line("a")} · {line("t")} ·{" "}
-            {line("b")} · {line("c")} · {line("f")}
+            {line("b")} · {line("c")} · {line("f")} · {line("runway")}
           </span>
           <span>{note}</span>
         </div>

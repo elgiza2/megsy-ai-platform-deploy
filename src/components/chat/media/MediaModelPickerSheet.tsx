@@ -11,7 +11,7 @@ import { BrandIcon, hasBrandIcon } from "@/components/chat/media/BrandIcon";
 import { useUserPlan } from "@/hooks/useUserPlan";
 import { isFreeModel, isPaidUser } from "@/lib/subscriptionGating";
 import { filterImageModels, filterVideoModels } from "@/lib/mediaModelPolicy";
-import { isUnlimitedMediaModel, mediaModelBadge } from "@/lib/mediaQuota";
+import { isUnlimitedImageModel, isUnlimitedMediaModel, mediaModelBadge } from "@/lib/mediaQuota";
 import MegsyStar from "@/components/branding/MegsyStar";
 import { useUserLang } from "@/lib/authI18n";
 import megsyModelIcon from "@/assets/megsy-model.jpg";
@@ -136,7 +136,9 @@ export default function MediaModelPickerSheet({
             {filtered.map((m) => {
               const active = m.slug === selectedSlug;
               const modelIsFree =
-                mode === "video" ? isUnlimitedMediaModel(m) : isFreeModel(m.slug || m.id);
+                mode === "video"
+                  ? isUnlimitedMediaModel(m)
+                  : isFreeModel(m.slug || m.id) || (paid && isUnlimitedImageModel(m));
               const locked = !modelIsFree && !paid;
               const showPro = !!m.isPremium || locked;
               const description = shortDescription((m.description || describeModel(m, mode === "video" ? "video" : "image")).replace(/\s*Free\s*/gi, " "));
