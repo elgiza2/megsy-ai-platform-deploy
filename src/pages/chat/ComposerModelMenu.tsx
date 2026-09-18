@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState, useLayoutEffect, type ReactNode }
 import { m as motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 import { ArrowLeft, Check, ChevronDown, Lock, Sliders, X } from "lucide-react";
-import MegsyStar from "@/components/files/MegsyStar";
 import { toast } from "sonner";
 import { promptUpgrade } from "@/lib/upgradeMoment";
 import type { AgentModel } from "@/lib/agentRegistry";
@@ -264,12 +263,6 @@ export default function ComposerModelMenu({
                             >
                               {item.label}
                             </span>
-                            {item.premium && (
-                              <MegsyStar size={11} static className="text-[var(--megsy-blue)]" />
-                            )}
-                          </span>
-                          <span className="mt-[2px] block truncate text-[11px] leading-snug text-foreground/60">
-                            {item.desc}
                           </span>
                         </span>
                       </button>
@@ -393,14 +386,8 @@ export default function ComposerModelMenu({
                               <span className="block text-[13px] font-semibold leading-tight truncate tracking-tight text-foreground">
                                 {item.label}
                               </span>
-                              {item.premium && (
-                                <MegsyStar size={11} static className="text-[var(--megsy-blue)]" />
-                              )}
-                            </span>
-                            <span className="mt-[2px] block truncate text-[11px] leading-snug text-foreground/60">
-                              {item.desc}
-                            </span>
                           </span>
+                        </span>
                         </button>
                       );
                     })}
@@ -418,4 +405,3 @@ export default function ComposerModelMenu({
     </div>
   );
 }
-
