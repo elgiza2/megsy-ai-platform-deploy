@@ -3,6 +3,7 @@
  *
  * Image generation is intentionally limited to a small, well-understood set:
  *  - Paid flagships: Nano Banana 2 (Gemini image) and GPT Image 2
+ *  - Runway Dev image models
  *  - Free models served through the DeAPI provider
  *
  * Video keeps the full catalogue for now (the curated video list is coming).
@@ -17,6 +18,11 @@ const IMAGE_ALLOW_PATTERNS: RegExp[] = [
   /deapi/i,
   /seedream/i,
   /grok/i,
+  /runway/i,
+  /gen4[_-]?image/i,
+  /gpt_image_2_5/i,
+  /muse_image/i,
+  /seedream5/i,
 ];
 
 const key = (m: any) => `${m?.slug || m?.id || ""} ${m?.name || ""} ${m?.provider || ""}`;

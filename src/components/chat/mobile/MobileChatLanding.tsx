@@ -17,7 +17,7 @@ import { MEGSY_TYPING_PHRASES, pickMegsyPhrase } from "./megsyPhrases";
 import MobileOnboardingTour from "./MobileOnboardingTour";
 import MegsyStar from "@/components/files/MegsyStar";
 
-export type LandingChipId = "image" | "website";
+export type LandingChipId = "image" | "video" | "website";
 
 export interface LandingChip {
   id: LandingChipId;
@@ -41,6 +41,13 @@ const ImageGlyph = ({ className }: GlyphProps) => (
     <circle cx="9.1" cy="9.5" r="1.7" fill="currentColor" stroke="none" />
     <path d="M3.6 16.8l4-4a2.2 2.2 0 0 1 3.1 0l4.9 4.9" />
     <path d="M13.5 15.3l1.6-1.6a2.2 2.2 0 0 1 3.1 0l2.2 2.2" opacity=".5" />
+  </svg>
+);
+const VideoGlyph = ({ className }: GlyphProps) => (
+  <svg {...glyphBase} className={className}>
+    <rect x="3" y="5" width="13.8" height="14" rx="3.2" />
+    <path d="m16.8 10 4.2-2.4v8.8L16.8 14" />
+    <path d="m9.2 9.4 3.7 2.6-3.7 2.6z" fill="currentColor" stroke="none" />
   </svg>
 );
 const WebsiteGlyph = ({ className }: GlyphProps) => (
@@ -90,11 +97,13 @@ const LearningGlyph = ({ className }: GlyphProps) => (
 
 const CHIP_ICONS: Record<LandingChipId, React.ComponentType<{ className?: string }>> = {
   image: ImageGlyph,
+  video: VideoGlyph,
   website: WebsiteGlyph,
 };
 
 export const DEFAULT_LANDING_CHIPS: LandingChip[] = [
   { id: "image", label: "Images" },
+  { id: "video", label: "Video" },
   { id: "website", label: "Website" },
 ];
 
