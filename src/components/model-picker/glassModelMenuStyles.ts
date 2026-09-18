@@ -15,7 +15,7 @@ export const glassModelMenuFullScreenStyle: CSSProperties = {
 };
 
 export const glassModelMenuTriggerStyle: CSSProperties = {
-  background: "transparent",
+  background: "var(--chat-claude-composer, hsl(var(--card)))",
   boxShadow: "none",
   border: "0px",
 };

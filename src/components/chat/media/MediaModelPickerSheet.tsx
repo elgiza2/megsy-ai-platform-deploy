@@ -15,9 +15,10 @@ import megsyModelIcon from "@/assets/megsy-model.jpg";
 
 function ModelIcon({ model }: { model: any }) {
   const isMegsy = /megsy/i.test(String(model.name || ""));
-  const src = isMegsy ? megsyModelIcon : model.thumbnailUrl || model.iconUrl;
-  if (src) return <img src={src} alt="" className={`h-11 w-11 shrink-0 rounded-xl ${isMegsy ? "object-cover" : "object-contain"}`} />;
-  if (hasBrandIcon(model.name, model.provider)) {
+  const providerIcon = hasBrandIcon(model.name, model.provider);
+  const src = isMegsy ? megsyModelIcon : model.iconUrl;
+  if (isMegsy || src) return <img src={src} alt="" className={`h-11 w-11 shrink-0 rounded-xl ${isMegsy ? "object-cover" : "object-contain"}`} />;
+  if (providerIcon) {
     return <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-foreground/[0.05]"><BrandIcon name={model.name} provider={model.provider} variant="color" size={28} /></span>;
   }
   return <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-foreground/[0.05] text-lg font-bold text-foreground/70">{(model.name || "?").trim().charAt(0).toUpperCase()}</span>;
@@ -51,7 +52,8 @@ export default function MediaModelPickerSheet({ open, onOpenChange, mode, select
     const target = mode === "video" ? ["video", "video-i2v"] : ["image"];
     const scoped = models.filter((m) => target.includes(m.type as string));
     const sorted = (mode === "video" ? filterVideoModels(scoped) : filterImageModels(scoped)).sort((a, b) => Number(!!b.isFeatured) - Number(!!a.isFeatured));
-    return mode === "video" ? sorted.slice(0, 5) : sorted;
+    const unique = sorted.filter((model, index, list) => list.findIndex((candidate) => `${candidate.name}|${candidate.provider}`.toLowerCase() === `${model.name}|${model.provider}`.toLowerCase()) === index);
+    return mode === "video" ? unique.slice(0, 5) : unique;
   }, [models, mode]);
 
   return (
