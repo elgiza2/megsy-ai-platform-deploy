@@ -32,8 +32,11 @@ const PROVIDER_LOGO: Record<string, string> = {
 
 // Pick a logo for a model based on provider or slug substring
 function pickLogo(provider: string, slug: string): string | undefined {
+  const providerKey = provider?.toLowerCase().trim();
+  const providerLogo = PROVIDER_LOGO[providerKey];
+  if (providerLogo && !["fal", "openrouter", "apify"].includes(providerKey)) return providerLogo;
   const s = slug.toLowerCase();
-  if (s.includes("nano-banana")) return "/model-logos/nano-banana.webp";
+  if (s.includes("nano-banana")) return PROVIDER_LOGO.google;
   if (s.includes("gpt-image")) return PROVIDER_LOGO.openai;
   if (s.includes("flux")) return PROVIDER_LOGO.bfl;
   if (s.includes("ideogram")) return PROVIDER_LOGO.ideogram;
@@ -51,7 +54,21 @@ function pickLogo(provider: string, slug: string): string | undefined {
   if (s.includes("megsy")) return PROVIDER_LOGO.megsy;
   if (s.includes("hidream")) return PROVIDER_LOGO.hidream;
   if (s.includes("stable") || s.includes("sd-")) return PROVIDER_LOGO.stability;
-  return PROVIDER_LOGO[provider?.toLowerCase()] ?? PROVIDER_LOGO.fal;
+  return providerLogo ?? PROVIDER_LOGO.fal;
+}
+
+function canonicalModelName(name = "", slug = ""): string {
+  const key = `${slug} ${name}`.toLowerCase();
+  if (/gpt[_ -]?image[_ -]?2[._ -]?5/.test(key)) return "GPT Image 2.5";
+  if (/gpt[_ -]?image[_ -]?2(\D|$)/.test(key)) return "GPT Image 2";
+  if (/seedance.*2[._ -]?5/.test(key)) return "Seedance 2.5";
+  if (/seedance.*2/.test(key)) return "Seedance 2";
+  if (/veo.*3[._ -]?1/.test(key)) return "Veo 3.1";
+  if (/kling.*3/.test(key)) return "Kling 3";
+  if (/hailuo.*3/.test(key) || /minimax.*h3/.test(key)) return "MiniMax H3";
+  if (/nano.*banana/.test(key) || /gemini.*image/.test(key)) return "Nano Banana";
+  if (/flux/.test(key)) return "FLUX";
+  return cleanModelName(name);
 }
 
 function cleanModelName(name = ""): string {
@@ -256,7 +273,7 @@ function imageRowToModelDetail(r: any): ModelDetail {
     ? r.supported_resolutions[r.supported_resolutions.length - 1]
     : null;
   if (topRes) badges.push(String(topRes));
-  const cleanName = cleanModelName(r.display_name);
+  const cleanName = canonicalModelName(r.display_name, r.slug);
   return {
     id: r.slug,
     slug: r.slug,
@@ -315,7 +332,7 @@ function videoRowToModelDetail(r: any): ModelDetail {
     r.unit === "video"
       ? Number(r.credits_per_video) || 0
       : (Number(r.credits_per_second) || 0) * (r.default_duration || 5);
-  const cleanName = cleanModelName(r.display_name);
+  const cleanName = canonicalModelName(r.display_name, r.slug);
   return {
     id: r.slug,
     slug: r.slug,
@@ -369,7 +386,7 @@ function alibabaRowToModelDetail(r: any): ModelDetail {
   if (r.is_featured) badges.push("FAST");
   const topRes = resolutions[resolutions.length - 1];
   if (topRes) badges.push(String(topRes));
-  const cleanName = cleanModelName(r.display_name);
+  const cleanName = canonicalModelName(r.display_name, r.slug);
   return {
     id: r.slug,
     slug: r.slug,
@@ -432,9 +449,9 @@ function mergeRunwayFallbacks(models: ModelDetail[]): ModelDetail[] {
   return [...models, ...runwayFallbackModels().filter((m) => !known.has(`${m.provider}:${m.slug || m.id}`))];
 }
 
-const MODELS_CACHE_KEY = "megsy_cache_dynamic_models_v8";
+const MODELS_CACHE_KEY = "megsy_cache_dynamic_models_v9";
 const MODELS_CACHE_TTL = 24 * 60 * 60 * 1000; // 24h — admin-managed, rarely changes
-const MODEL_SOURCE_VERSION = "verified-live-v8";
+const MODEL_SOURCE_VERSION = "verified-live-v9";
 export const LOCAL_IMAGE_MODELS_KEY = "megsy_local_image_models_v1";
 
 function readLocalImageModels(): ModelDetail[] {

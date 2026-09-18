@@ -52,7 +52,7 @@ export default function MediaModelPickerSheet({ open, onOpenChange, mode, select
     const target = mode === "video" ? ["video", "video-i2v"] : ["image"];
     const scoped = models.filter((m) => target.includes(m.type as string));
     const sorted = (mode === "video" ? filterVideoModels(scoped) : filterImageModels(scoped)).sort((a, b) => Number(!!b.isFeatured) - Number(!!a.isFeatured));
-    const unique = sorted.filter((model, index, list) => list.findIndex((candidate) => `${candidate.name}|${candidate.provider}`.toLowerCase() === `${model.name}|${model.provider}`.toLowerCase()) === index);
+    const unique = sorted.filter((model, index, list) => list.findIndex((candidate) => candidate.name.trim().toLowerCase() === model.name.trim().toLowerCase()) === index);
     return mode === "video" ? unique.slice(0, 5) : unique;
   }, [models, mode]);
 
