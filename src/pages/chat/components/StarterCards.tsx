@@ -1,5 +1,6 @@
 import {
   Image,
+  Video,
   Globe,
   LayoutTemplate,
   Search,
@@ -16,6 +17,7 @@ export interface StarterCardsProps {
 /** Real services, reordered and shown with clean, recognisable icons. */
 const CARDS = [
   { id: "image", mode: "images", Icon: Image, title: "Images", titleAr: "صور" },
+  { id: "video", mode: "video", Icon: Video, title: "Video", titleAr: "فيديو" },
   { id: "web", mode: "code", Icon: Globe, title: "Website", titleAr: "موقع" },
   { id: "slides", mode: "slides", Icon: LayoutTemplate, title: "Slides", titleAr: "عروض" },
   { id: "research", mode: "deep-research", Icon: Search, title: "Research", titleAr: "بحث" },
