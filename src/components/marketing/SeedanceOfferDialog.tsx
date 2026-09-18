@@ -19,7 +19,7 @@ type Offer = {
 const OFFERS: Offer[] = [
   {
     id: "gpt_25",
-    image: "/offer-gpt.png",
+    image: "/offer-gpt-seedance.png",
     title: "GPT 2.5 Unlimited",
     titleAr: "GPT 2.5 بلا حدود",
     body: "Use our flagship model without limits for a full month.",
@@ -27,7 +27,7 @@ const OFFERS: Offer[] = [
   },
   {
     id: "computer",
-    image: "/offer-computer.png",
+    image: "/offer-computer-seedance.png",
     title: "Megsy Computer",
     titleAr: "ميغسي كومبيوتر",
     body: "Let Megsy browse, click, research and get work done for you.",
@@ -35,7 +35,7 @@ const OFFERS: Offer[] = [
   },
   {
     id: "agent",
-    image: "/offer-agent.png",
+    image: "/offer-agent-seedance.png",
     title: "Megsy Agent",
     titleAr: "وكيل ميغسي",
     body: "Turn complex goals into finished work with an autonomous AI agent.",
@@ -104,11 +104,11 @@ export default function SeedanceOfferDialog() {
     <Dialog open={open} onOpenChange={(nextOpen) => (nextOpen ? setOpen(true) : dismiss())}>
       <DialogContent
         dir={isArabic ? "rtl" : "ltr"}
-        className="fixed bottom-0 left-1/2 top-auto z-50 grid w-full max-w-[540px] translate-x-[-50%] translate-y-0 gap-0 rounded-t-[32px] rounded-b-none border-0 bg-[#f3f1ed] p-0 text-[#121212] shadow-[0_-14px_50px_rgba(0,0,0,0.2)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:slide-in-from-bottom-8 data-[state=closed]:slide-out-to-bottom-8 [&>button]:hidden"
+        className="offers-bottom-sheet fixed bottom-0 left-1/2 top-auto z-50 grid max-h-[90dvh] w-full max-w-[540px] translate-x-[-50%] translate-y-0 gap-0 overflow-y-auto rounded-t-[32px] rounded-b-none border-0 bg-[#f3f1ed] p-0 text-[#121212] shadow-[0_-14px_50px_rgba(0,0,0,0.2)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:slide-in-from-bottom-8 data-[state=closed]:slide-out-to-bottom-8 [&>button]:hidden"
       >
         <div className="px-5 pb-8 pt-4 sm:px-9 sm:pb-10 sm:pt-5">
           <div className="mx-auto h-1.5 w-12 rounded-full bg-[#4d4b50]" />
-          <div className="mt-4 flex justify-center gap-1.5" aria-label={isArabic ? "العروض" : "Offers"}>
+          <div className="mt-4 flex min-h-2 justify-center gap-1.5" aria-label={isArabic ? "العروض" : "Offers"}>
             {OFFERS.map((offer, index) => (
               <button
                 key={offer.id}
