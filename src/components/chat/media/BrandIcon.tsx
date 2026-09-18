@@ -47,6 +47,12 @@ const REGISTRY: Record<string, () => Promise<IconModule>> = {
 function pickBrandKey(name = "", provider = ""): keyof typeof REGISTRY | null {
   const n = `${name} ${provider}`.toLowerCase();
   const p = provider.toLowerCase().trim();
+  // Model identity wins over an upstream routing provider. For example, the
+  // GPT Image rows can be routed through Runway, but must still show OpenAI.
+  if (n.includes("gpt") && n.includes("image")) return "openai";
+  if (n.includes("seedream") || n.includes("seedance")) return "bytedance";
+  if (n.includes("nano banana") || n.includes("nano-banana") || n.includes("nanobanana")) return "nanobanana";
+  if (n.includes("veo")) return "gemini";
   if (p === "openai") return "openai";
   if (p === "google" || p === "gemini") return "gemini";
   if (p === "bytedance") return "bytedance";
@@ -67,7 +73,6 @@ function pickBrandKey(name = "", provider = ""): keyof typeof REGISTRY | null {
   if (p === "qwen" || p === "alibaba") return "alibaba";
   if (n.includes("claude") || n.includes("anthropic")) return "anthropic";
   if (n.includes("sonar") || n.includes("perplex")) return "perplexity";
-  if (n.includes("nano banana") || n.includes("nano-banana") || n.includes("nanobanana")) return "nanobanana";
   if (n.includes("kontext") || n.includes("flux")) return "flux";
   if (n.includes("bfl") || n.includes("black forest")) return "bfl";
   if (n.includes("sora")) return "sora";
@@ -75,7 +80,7 @@ function pickBrandKey(name = "", provider = ""): keyof typeof REGISTRY | null {
   if (n.includes("midjourney") || /\bmj\b/.test(n)) return "midjourney";
   if (n.includes("imagen") || n.includes("veo") || n.includes("gemini")) return "gemini";
   if (n.includes("gpt") || n.includes("openai")) return "openai";
-  if (n.includes("seedream") || n.includes("seedance") || n.includes("doubao")) return "bytedance";
+  if (n.includes("doubao")) return "bytedance";
   if (n.includes("hunyuan")) return "hunyuan";
   if (n.includes("cogvideo") || n.includes("cogview")) return "cogvideo";
   if (n.includes("kolors")) return "kolors";
