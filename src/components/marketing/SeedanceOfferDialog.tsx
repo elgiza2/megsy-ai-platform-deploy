@@ -3,12 +3,13 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { useUserLang } from "@/lib/authI18n";
 
-const SESSION_KEY = "megsy_offers_carousel_seen_v2";
+const SESSION_KEY = "megsy_offers_carousel_seen_v3";
 const AUTOPLAY_MS = 4200;
 
 type Offer = {
   id: string;
   image: string;
+  imageAr?: string;
   title: string;
   titleAr: string;
   body: string;
@@ -43,6 +44,7 @@ const OFFERS: Offer[] = [
   {
     id: "seedance_25",
     image: "/seedance-2-5.jpeg",
+    imageAr: "/seedance-2-5-ar.png",
     title: "Seedance 2.5 Unlimited",
     titleAr: "Seedance 2.5 بلا حدود",
     body: "Create videos freely for 7 full days for only $7.",
@@ -102,12 +104,24 @@ export default function SeedanceOfferDialog() {
     <Dialog open={open} onOpenChange={(nextOpen) => (nextOpen ? setOpen(true) : dismiss())}>
       <DialogContent
         dir={isArabic ? "rtl" : "ltr"}
-        className="w-[calc(100%-1.5rem)] max-w-[520px] overflow-hidden rounded-[30px] border-0 bg-[#f6f4f1] p-0 text-[#111111] shadow-2xl"
+        className="fixed bottom-0 left-1/2 top-auto z-50 grid w-full max-w-[540px] translate-x-[-50%] translate-y-0 gap-0 rounded-t-[32px] rounded-b-none border-0 bg-[#f3f1ed] p-0 text-[#121212] shadow-[0_-14px_50px_rgba(0,0,0,0.2)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:slide-in-from-bottom-8 data-[state=closed]:slide-out-to-bottom-8 [&>button]:hidden"
       >
-        <div className="px-5 pb-7 pt-4 sm:px-7 sm:pb-8 sm:pt-5">
-          <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-black/30" />
+        <div className="px-5 pb-8 pt-4 sm:px-9 sm:pb-10 sm:pt-5">
+          <div className="mx-auto h-1.5 w-12 rounded-full bg-[#4d4b50]" />
+          <div className="mt-4 flex justify-center gap-1.5" aria-label={isArabic ? "العروض" : "Offers"}>
+            {OFFERS.map((offer, index) => (
+              <button
+                key={offer.id}
+                type="button"
+                aria-label={`${isArabic ? "اذهب إلى" : "Go to"} ${isArabic ? offer.titleAr : offer.title}`}
+                onClick={() => setActiveIndex(index)}
+                className={`h-1.5 rounded-full transition-all duration-300 ${index === activeIndex ? "w-7 bg-[#171717]" : "w-1.5 bg-black/20"}`}
+              />
+            ))}
+          </div>
+
           <div
-            className="relative overflow-hidden rounded-[24px] bg-[#1c1c1c] shadow-[0_16px_40px_rgba(0,0,0,0.18)]"
+            className="mt-4 overflow-hidden rounded-[25px] bg-[#252525] shadow-[0_12px_30px_rgba(0,0,0,0.16)] touch-pan-y"
             onPointerDown={(event) => {
               touchStartX.current = event.clientX;
             }}
@@ -120,46 +134,17 @@ export default function SeedanceOfferDialog() {
           >
             <img
               key={current.image}
-              src={current.image}
+              src={isArabic && current.imageAr ? current.imageAr : current.image}
               alt={isArabic ? current.titleAr : current.title}
-              className="h-[210px] w-full object-cover transition-opacity duration-300 sm:h-[250px]"
+              className="block h-[205px] w-full object-cover sm:h-[270px]"
             />
-            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 to-transparent" />
-            <button
-              type="button"
-              aria-label={isArabic ? "العرض السابق" : "Previous offer"}
-              onClick={() => move(-1)}
-              className="absolute left-3 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full bg-black/35 text-xl text-white backdrop-blur transition hover:bg-black/60"
-            >
-              {isArabic ? "›" : "‹"}
-            </button>
-            <button
-              type="button"
-              aria-label={isArabic ? "العرض التالي" : "Next offer"}
-              onClick={() => move(1)}
-              className="absolute right-3 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full bg-black/35 text-xl text-white backdrop-blur transition hover:bg-black/60"
-            >
-              {isArabic ? "‹" : "›"}
-            </button>
           </div>
 
-          <div className="mt-4 flex justify-center gap-1.5" aria-label={isArabic ? "العروض" : "Offers"}>
-            {OFFERS.map((offer, index) => (
-              <button
-                key={offer.id}
-                type="button"
-                aria-label={`${isArabic ? "اذهب إلى" : "Go to"} ${isArabic ? offer.titleAr : offer.title}`}
-                onClick={() => setActiveIndex(index)}
-                className={`h-1.5 rounded-full transition-all duration-300 ${index === activeIndex ? "w-7 bg-black" : "w-1.5 bg-black/20"}`}
-              />
-            ))}
-          </div>
-
-          <div className={`mt-5 space-y-2 ${isArabic ? "text-right" : "text-left"}`}>
-            <DialogTitle className="text-[25px] font-bold tracking-tight sm:text-[29px]">
+          <div className="mt-6 text-center">
+            <DialogTitle className="text-[24px] font-bold tracking-tight sm:text-[28px]">
               {isArabic ? current.titleAr : current.title}
             </DialogTitle>
-            <DialogDescription className="text-[15px] leading-7 text-black/60 sm:text-base">
+            <DialogDescription className="mx-auto mt-2 max-w-[430px] text-[15px] leading-7 text-[#6f6b70] sm:text-base">
               {isArabic ? current.bodyAr : current.body}
             </DialogDescription>
           </div>
@@ -167,16 +152,16 @@ export default function SeedanceOfferDialog() {
           <button
             type="button"
             onClick={tryNow}
-            className="mt-6 h-12 w-full rounded-full bg-gradient-to-r from-[#f10b78] via-[#f32845] to-[#ff6b21] text-base font-semibold text-white shadow-lg shadow-pink-500/20 transition hover:brightness-105 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
+            className="mt-6 h-[54px] w-full rounded-full bg-gradient-to-r from-[#f40b79] via-[#f32948] to-[#ff6b1f] text-base font-semibold text-white shadow-[0_8px_20px_rgba(243,34,91,0.18)] transition hover:brightness-105 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
           >
             {isArabic ? "جرّب الآن" : "Try now"}
           </button>
           <button
             type="button"
             onClick={dismiss}
-            className="mt-3 w-full text-sm font-medium text-black/45 transition hover:text-black/75"
+            className="mt-3 w-full text-[15px] font-medium text-[#d0443a] transition hover:text-[#a52e28]"
           >
-            {isArabic ? "لاحقًا" : "Maybe later"}
+            {isArabic ? "لاحقًا" : "Later"}
           </button>
         </div>
       </DialogContent>
