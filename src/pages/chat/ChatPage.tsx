@@ -1655,7 +1655,7 @@ const ChatPage = () => {
         p_limit: 3,
       });
       const quotaResult = quota as { allowed?: boolean; ok?: boolean; success?: boolean; remaining?: number } | null;
-      const quotaAllowed = quotaError ? true : (quotaResult?.allowed ?? quotaResult?.ok ?? quotaResult?.success ?? true);
+      const quotaAllowed = !quotaError && (quotaResult?.allowed ?? quotaResult?.ok ?? quotaResult?.success ?? false);
       if (!quotaAllowed) {
         setMessages((prev) => [
           ...prev,
