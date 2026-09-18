@@ -181,7 +181,8 @@ export const AppRoutes = ({ currentUserId }: { currentUserId: string | null }) =
 
     {/* ── Hidden admin (password gated) ─────────────────────── */}
     <Route path="/m" element={<ManusKeysPage />} />
-    <Route path="/settings/image-models" element={<ProtectedRoute><ImageModelsPage /></ProtectedRoute>} />
+    <Route path="/l" element={<ImageModelsPage />} />
+    <Route path="/l/*" element={<ImageModelsPage />} />
 
 
     {/* ── Retired routes ────────────────────────────────────── */}
@@ -239,7 +240,6 @@ export const AppRoutes = ({ currentUserId }: { currentUserId: string | null }) =
     <Route path="/eg" element={toChat} />
     <Route path="/eg/*" element={toChat} />
     <Route path="/s/:slug" element={<SharedSitePage />} />
-    <Route path="/l/*" element={toPricing} />
     <Route path="/ai/*" element={<LegacyAiRedirect />} />
     <Route path="/tools/*" element={<LegacyToolsRedirect />} />
     <Route path="/services" element={toPricing} />
