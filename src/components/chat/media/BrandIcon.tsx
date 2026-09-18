@@ -46,6 +46,25 @@ const REGISTRY: Record<string, () => Promise<IconModule>> = {
 
 function pickBrandKey(name = "", provider = ""): keyof typeof REGISTRY | null {
   const n = `${name} ${provider}`.toLowerCase();
+  const p = provider.toLowerCase().trim();
+  if (p === "openai") return "openai";
+  if (p === "google" || p === "gemini") return "gemini";
+  if (p === "bytedance") return "bytedance";
+  if (p === "minimax") return "minimax";
+  if (p === "runway") return "runway";
+  if (p === "kling") return "kling";
+  if (p === "luma") return "luma";
+  if (p === "pika") return "pika";
+  if (p === "pixverse") return "pixverse";
+  if (p === "fal") return "fal";
+  if (p === "xai") return "xai";
+  if (p === "stability") return "stability";
+  if (p === "ideogram") return "ideogram";
+  if (p === "recraft") return "recraft";
+  if (p === "bfl") return "bfl";
+  if (p === "anthropic") return "anthropic";
+  if (p === "perplexity") return "perplexity";
+  if (p === "qwen" || p === "alibaba") return "alibaba";
   if (n.includes("claude") || n.includes("anthropic")) return "anthropic";
   if (n.includes("sonar") || n.includes("perplex")) return "perplexity";
   if (n.includes("nano banana") || n.includes("nano-banana") || n.includes("nanobanana")) return "nanobanana";
@@ -56,7 +75,7 @@ function pickBrandKey(name = "", provider = ""): keyof typeof REGISTRY | null {
   if (n.includes("midjourney") || /\bmj\b/.test(n)) return "midjourney";
   if (n.includes("imagen") || n.includes("veo") || n.includes("gemini")) return "gemini";
   if (n.includes("gpt") || n.includes("openai")) return "openai";
-  if (n.includes("seedream") || n.includes("seedance") || n.includes("doubao")) return "doubao";
+  if (n.includes("seedream") || n.includes("seedance") || n.includes("doubao")) return "bytedance";
   if (n.includes("hunyuan")) return "hunyuan";
   if (n.includes("cogvideo") || n.includes("cogview")) return "cogvideo";
   if (n.includes("kolors")) return "kolors";
