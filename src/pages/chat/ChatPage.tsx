@@ -28,7 +28,6 @@ import { warmEdgeFunctions } from "@/lib/warmEdgeFunctions";
 import AppSidebar from "@/components/layout/AppSidebar";
 import { useSidebarCollapsed } from "@/hooks/useSidebarCollapsed";
 import { isPaidUser } from "@/lib/subscriptionGating";
-import { isUnlimitedMediaModel } from "@/lib/mediaQuota";
 
 // Background job helpers and one-off lib utilities that are still referenced
 // from the surviving body (cancel/cleanup paths, etc.).
@@ -1623,19 +1622,10 @@ const ChatPage = () => {
       return;
     }
 
-    // Video used to be subscribers-only; the free DeAPI video models make
-    // basic video generation free for everyone. Only a paid video model
-    // (premium or credit-priced) still hits the paywall now.
     const isPaidPlan = isPaidUser(userPlan);
 
+    // All video models in the curated picker are premium-only.
     if (chatMode === "video" && !isPaidPlan) {
-      const videoModel = mediaModel as any | null;
-      const hasVideoModel = !!videoModel && videoModel.type === "video";
-      const videoModelFree =
-        hasVideoModel &&
-        !videoModel.isPremium &&
-        (isUnlimitedMediaModel(videoModel) || Number(videoModel.credits ?? 0) === 0);
-      if (hasVideoModel && !videoModelFree) {
         setMessages((prev) => [
           ...prev,
           {
@@ -1655,31 +1645,27 @@ const ChatPage = () => {
         setInput("");
         isSubmittingRef.current = false;
         return;
-      }
-      // No model picked yet → fall through so the media-mode block prompts
-      // the user to choose (and auto-picks the default free model).
     }
 
-    if (chatMode === "images" && (mediaModel as any)?.isPremium && !isPaidPlan) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "user",
-          clientId: `user-image-premium-paywall-${Date.now()}`,
-          content: text,
-          mode: chatMode,
-        } as Message,
-        {
-          role: "assistant",
-          clientId: `assist-image-premium-paywall-${Date.now()}`,
-          content: "",
-          mode: chatMode,
-          paywall: { feature: "images" },
-        } as Message,
-      ]);
-      setInput("");
-      isSubmittingRef.current = false;
-      return;
+    // Free signed-in users receive three image generations per rolling 12h
+    // window. The RPC is authoritative and atomically consumes one slot.
+    if (chatMode === "images" && !isPaidPlan && chatUserId) {
+      const { data: quota, error: quotaError } = await supabase.rpc("consume_free_image_use", {
+        p_user_id: chatUserId,
+        p_limit: 3,
+      });
+      const quotaResult = quota as { allowed?: boolean; ok?: boolean; success?: boolean; remaining?: number } | null;
+      const quotaAllowed = quotaError ? true : (quotaResult?.allowed ?? quotaResult?.ok ?? quotaResult?.success ?? true);
+      if (!quotaAllowed) {
+        setMessages((prev) => [
+          ...prev,
+          { role: "user", clientId: `user-image-quota-${Date.now()}`, content: text, mode: chatMode } as Message,
+          { role: "assistant", clientId: `assist-image-quota-${Date.now()}`, content: "", mode: chatMode, paywall: { feature: "images" } } as Message,
+        ]);
+        setInput("");
+        isSubmittingRef.current = false;
+        return;
+      }
     }
 
     isSubmittingRef.current = true;

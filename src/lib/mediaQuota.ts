@@ -1,15 +1,14 @@
 /**
  * Media generation policy (UI-advisory only — the server re-validates).
  *
- * Images: unlimited on every paid plan (and on the free DeAPI models).
- * Video:  metered. Every premium video model costs MC from the monthly
- *         balance, and each plan gets a soft monthly video allowance.
- *         DeAPI-served video models stay unlimited and cost nothing.
+ * Images: premium catalogue; free signed-in users receive 3 generations per
+ *         rolling 12-hour window through the authoritative RPC.
+ * Video:  premium-only. Every video model costs MC from the monthly balance.
  */
 
 export type MediaPlanTier = "free" | "pro" | "elite";
 
-/** DeAPI-served models are free & unlimited (images and video alike). */
+/** Retained for compatibility with older callers; the curated picker is paid-only. */
 export function isUnlimitedMediaModel(model: {
   slug?: string;
   id?: string;
@@ -18,7 +17,7 @@ export function isUnlimitedMediaModel(model: {
   credits?: number;
 }): boolean {
   const key = `${model?.slug || model?.id || ""} ${model?.provider || ""} ${model?.name || ""}`;
-  return /deapi/i.test(key);
+  return false;
 }
 
 /** Runway images are included for paid subscribers; Runway videos remain metered. */
@@ -32,10 +31,10 @@ export function isUnlimitedImageModel(model: {
   return /runway|gpt_image_2_5|seedream5_pro|grok_imagine_image_2|muse_image|gemini_image3\.1_flash|gen4_image_turbo/i.test(key);
 }
 
-/** Images never consume the video allowance — they are unlimited. */
-export const IMAGES_UNLIMITED = true;
+/** Paid images are unlimited; free users are limited by the 3/12h RPC. */
+export const IMAGES_UNLIMITED = false;
 
-/** Soft monthly video allowance per plan (premium video models only). */
+/** Soft monthly video allowance per plan (all video models are premium). */
 export const VIDEO_MONTHLY_ALLOWANCE: Record<MediaPlanTier, number> = {
   free: 0,
   pro: 40,
@@ -62,8 +61,7 @@ export function mediaModelBadge(
   model: { slug?: string; id?: string; provider?: string; name?: string; credits?: number },
   kind: "image" | "video",
 ): string {
-  if (isUnlimitedMediaModel(model)) return "Unlimited";
-  if (kind === "image") return "Unlimited";
+  if (kind === "image") return "3 / 12h free";
   // Paid video model: always price it, never show it as included.
   const cost = Number(model?.credits || 0) || DEFAULT_VIDEO_CREDIT_COST;
   return `${cost} MC`;

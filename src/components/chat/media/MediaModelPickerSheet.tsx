@@ -7,9 +7,8 @@ import { useDynamicModels } from "@/hooks/useModels";
 import { AlertCircle, Check, RefreshCw } from "lucide-react";
 import { BrandIcon, hasBrandIcon } from "@/components/chat/media/BrandIcon";
 import { useUserPlan } from "@/hooks/useUserPlan";
-import { isFreeModel, isPaidUser } from "@/lib/subscriptionGating";
+import { isPaidUser } from "@/lib/subscriptionGating";
 import { filterImageModels, filterVideoModels } from "@/lib/mediaModelPolicy";
-import { isUnlimitedImageModel, isUnlimitedMediaModel } from "@/lib/mediaQuota";
 import { useUserLang } from "@/lib/authI18n";
 import megsyModelIcon from "@/assets/megsy-model.jpg";
 
@@ -70,8 +69,10 @@ export default function MediaModelPickerSheet({ open, onOpenChange, mode, select
           <div className="space-y-2">
             {filtered.map((m) => {
               const active = m.slug === selectedSlug;
-              const modelIsFree = mode === "video" ? isUnlimitedMediaModel(m) : isFreeModel(m.slug || m.id) || (paid && isUnlimitedImageModel(m));
-              const locked = !modelIsFree && !paid;
+              // Images are premium catalogue entries but guests may select them;
+              // the server enforces the real 3-image / 12-hour guest quota.
+              // Video is premium-only: do not expose a free video path here.
+              const locked = mode === "video" && !paid;
               return <button key={m.id} type="button" onClick={() => {
                 if (locked) { promptUpgrade(m.name); onOpenChange(false); navigate("/pricing"); return; }
                 onSelect({ slug: m.slug || m.id, name: m.name, provider: m.provider, credits: m.credits, thumbnail: m.thumbnailUrl || m.iconUrl, type: mode === "video" ? "video" : "image", isPremium: !!m.isPremium });
