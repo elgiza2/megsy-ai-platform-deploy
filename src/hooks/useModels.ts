@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ALL_MODEL_DETAILS, type ModelDetail } from "@/lib/modelDetails";
 import { withCuratedImageModels } from "@/lib/curatedImageModels";
@@ -435,6 +435,17 @@ function mergeRunwayFallbacks(models: ModelDetail[]): ModelDetail[] {
 const MODELS_CACHE_KEY = "megsy_cache_dynamic_models_v8";
 const MODELS_CACHE_TTL = 24 * 60 * 60 * 1000; // 24h — admin-managed, rarely changes
 const MODEL_SOURCE_VERSION = "verified-live-v8";
+export const LOCAL_IMAGE_MODELS_KEY = "megsy_local_image_models_v1";
+
+function readLocalImageModels(): ModelDetail[] {
+  try {
+    const raw = localStorage.getItem(LOCAL_IMAGE_MODELS_KEY);
+    const rows = raw ? JSON.parse(raw) : [];
+    return Array.isArray(rows) ? rows : [];
+  } catch {
+    return [];
+  }
+}
 
 function readCachedModels(): ModelDetail[] | null {
   try {
@@ -466,14 +477,20 @@ function writeCachedModels(models: ModelDetail[]) {
 
 export function useDynamicModels() {
   const initial = typeof window !== "undefined" ? readCachedModels() : null;
-  const [models, setModels] = useState<ModelDetail[]>(initial ?? ALL_MODEL_DETAILS);
+  const [models, setModels] = useState<ModelDetail[]>(
+    withCuratedImageModels([...(initial ?? ALL_MODEL_DETAILS), ...readLocalImageModels()]),
+  );
   // The bundled catalog is usable immediately; refresh remote metadata in the background.
   // This keeps the picker interactive even when a Supabase model query is slow or unavailable.
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [reloadToken, setReloadToken] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
+      setLoading(true);
+      setError(null);
       try {
         const [imgRes, vidRes, aliRes, memRes] = await Promise.all([
           (supabase as any)
@@ -503,7 +520,8 @@ export function useDynamicModels() {
         if (aliRes.error) console.error("Failed to load Alibaba video models:", aliRes.error);
 
         const imageModels = withCuratedImageModels(
-          mergeRunwayFallbacks((imgRes.data ?? []).map(imageRowToModelDetail)).filter((m) => m.type === "image"),
+          [...mergeRunwayFallbacks((imgRes.data ?? []).map(imageRowToModelDetail)), ...readLocalImageModels()]
+            .filter((m) => m.type === "image"),
         );
         const videoModels = [
           ...(vidRes.data ?? []).map(videoRowToModelDetail),
@@ -535,16 +553,22 @@ export function useDynamicModels() {
         writeCachedModels(result);
       } catch (e) {
         console.error("Failed to load dynamic models:", e);
+        if (!cancelled) {
+          setError("تعذّر تحديث كتالوج النماذج. يتم عرض النماذج المحفوظة حاليًا.");
+          setModels((current) => withCuratedImageModels([...current, ...readLocalImageModels()]));
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      if (!cancelled) setLoading(false);
     };
     load();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [reloadToken]);
 
-  return { models, loading };
+  const reload = useCallback(() => setReloadToken((token) => token + 1), []);
+  return { models, loading, error, reload };
 }
 
 function safeParse<T>(s: string, fallback: T): T {

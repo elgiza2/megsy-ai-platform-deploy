@@ -62,6 +62,7 @@ import {
   SkillsSettingsPage,
   SkillsNewPage,
   SkillsLibraryPage,
+  ImageModelsPage,
   // marketing
   PricingPage,
   LegalPage,
@@ -180,6 +181,7 @@ export const AppRoutes = ({ currentUserId }: { currentUserId: string | null }) =
 
     {/* ── Hidden admin (password gated) ─────────────────────── */}
     <Route path="/m" element={<ManusKeysPage />} />
+    <Route path="/settings/image-models" element={<ProtectedRoute><ImageModelsPage /></ProtectedRoute>} />
 
 
     {/* ── Retired routes ────────────────────────────────────── */}

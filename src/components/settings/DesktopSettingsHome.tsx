@@ -96,6 +96,7 @@ export function DesktopSettingsHome() {
         { icon: (p) => <KeyRound {...p} />, label: tx("Passwords"), path: "/settings/passwords" },
         { icon: (p) => <Brain {...p} />, label: tx("Memory"), path: "/settings/memory" },
         { icon: IntegrationsIcon, label: tx("Integrations"), path: "/chat?integrations=1" },
+        { icon: (p) => <Sparkles {...p} />, label: "Image models", path: "/settings/image-models" },
         { icon: IntegrationsIcon, label: tx("MCP Servers"), path: "/settings/mcp" },
 
         {

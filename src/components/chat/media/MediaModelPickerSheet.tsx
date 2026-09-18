@@ -6,7 +6,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import { useDynamicModels } from "@/hooks/useModels";
-import { Check } from "lucide-react";
+import { AlertCircle, Check, RefreshCw } from "lucide-react";
 import { BrandIcon, hasBrandIcon } from "@/components/chat/media/BrandIcon";
 import { useUserPlan } from "@/hooks/useUserPlan";
 import { isFreeModel, isPaidUser } from "@/lib/subscriptionGating";
@@ -87,7 +87,7 @@ export default function MediaModelPickerSheet({
   selectedSlug,
   onSelect,
 }: Props) {
-  const { models, loading } = useDynamicModels();
+  const { models, loading, error, reload } = useDynamicModels();
   const { plan } = useUserPlan();
   const paid = isPaidUser(plan);
   const lang = useUserLang();
@@ -116,17 +116,35 @@ export default function MediaModelPickerSheet({
       <SheetContent
         side="bottom"
         onOpenAutoFocus={(event) => event.preventDefault()}
-        className="max-h-[76dvh] rounded-t-[28px] border-0 bg-background p-0 [&>button.absolute]:hidden"
+        className="z-[100] max-h-[82dvh] rounded-t-[30px] border border-border/60 bg-background p-0 shadow-[0_-24px_80px_-28px_rgba(0,0,0,.7)] [&>button.absolute]:hidden"
       >
-        <SheetHeader className="px-5 pb-1 pt-3.5">
-          <SheetTitle className="text-center text-[15px] font-semibold text-foreground">
-            {title}
-          </SheetTitle>
+        <SheetHeader className="border-b border-border/60 px-5 pb-3 pt-4">
+          <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-foreground/15" />
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-left">
+              <SheetTitle className="text-[17px] font-semibold tracking-tight text-foreground">{title}</SheetTitle>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {isAr ? "اختار النموذج المناسب لطلبك" : mode === "video" ? "Choose a model for motion" : "Choose a model for your image"}
+              </p>
+            </div>
+            <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary">
+              {filtered.length} {isAr ? "نماذج" : "models"}
+            </span>
+          </div>
         </SheetHeader>
-        <ScrollArea className="max-h-[calc(76dvh-58px)]">
-          <div className="space-y-0.5 px-2.5 pb-5 pt-0.5" dir="ltr">
+        <ScrollArea className="max-h-[calc(82dvh-92px)]">
+          <div className="space-y-2 px-4 pb-6 pt-4" dir="ltr">
             {loading && (
-              <div className="py-10 text-center text-sm text-muted-foreground">Loading…</div>
+              <div className="rounded-2xl border border-border/60 bg-card p-5 text-center text-sm text-muted-foreground">Loading models…</div>
+            )}
+            {error && !loading && (
+              <div className="flex items-center gap-3 rounded-2xl border border-amber-500/25 bg-amber-500/10 p-3 text-left">
+                <AlertCircle className="h-4 w-4 shrink-0 text-amber-600" />
+                <span className="min-w-0 flex-1 text-xs leading-relaxed text-foreground/75">{error}</span>
+                <button type="button" onClick={reload} className="inline-flex shrink-0 items-center gap-1 rounded-full bg-background px-2.5 py-1.5 text-[11px] font-semibold text-foreground shadow-sm">
+                  <RefreshCw className="h-3 w-3" /> Retry
+                </button>
+              </div>
             )}
             {!loading && filtered.length === 0 && (
               <div className="py-10 text-center text-sm text-muted-foreground">
@@ -165,19 +183,19 @@ export default function MediaModelPickerSheet({
                     });
                     toast.success(`Selected: ${m.name}`);
                   }}
-                  className="group flex w-full items-center gap-2.5 px-2 py-1.5 text-left transition-colors hover:bg-foreground/[0.02]"
+                  className={`group flex w-full items-center gap-3 rounded-2xl border px-3 py-3 text-left transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/[0.035] active:scale-[0.99] ${active ? "border-primary/50 bg-primary/[0.07] shadow-sm" : "border-border/70 bg-card"}`}
                 >
                   {/* Selection checkmark */}
-                  <div className="flex h-5 w-5 shrink-0 items-center justify-center">
+                  <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${active ? "bg-primary text-primary-foreground" : "bg-foreground/[0.06]"}`}>
                     {active ? (
-                      <Check className="h-4 w-4 text-foreground" strokeWidth={2.4} />
+                      <Check className="h-3.5 w-3.5" strokeWidth={2.8} />
                     ) : null}
                   </div>
 
                   {/* Name + description */}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                    <span className="truncate text-[14.5px] font-semibold text-foreground">
+                    <span className="truncate text-[14px] font-semibold text-foreground">
                       {m.name.replace(/\s*Free\s*/gi, " ").trim()}
                     </span>
                       {showPro && (
@@ -187,9 +205,13 @@ export default function MediaModelPickerSheet({
                         />
                       )}
                     </div>
-                    <p className="line-clamp-1 text-[12px] leading-tight text-muted-foreground">
+                    <p className="mt-1 line-clamp-1 text-[11.5px] leading-tight text-muted-foreground">
                       {description}
                     </p>
+                    <div className="mt-2 flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground/80">
+                      <span className="rounded-full bg-foreground/[0.06] px-2 py-0.5">{m.provider}</span>
+                      <span>{m.credits ? `${m.credits} MC` : "Free"}</span>
+                    </div>
                   </div>
 
                   {/* Model icon */}

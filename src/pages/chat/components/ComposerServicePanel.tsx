@@ -67,7 +67,7 @@ export default function ComposerServicePanel({
     "flex h-full min-w-0 flex-1 items-center gap-2 rounded-full text-left text-[13px] font-medium text-foreground transition-colors active:scale-[0.99]";
 
   return (
-    <div className="flex h-8 items-center gap-1 rounded-full bg-foreground/[0.05] pl-3 pr-1">
+    <div data-media-service-panel={showMediaPicker ? "true" : undefined} className="flex h-8 items-center gap-1 rounded-full bg-foreground/[0.05] pl-3 pr-1">
       {showMediaPicker ? (
         <button
           type="button"
