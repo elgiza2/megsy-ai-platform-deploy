@@ -3,13 +3,12 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { useUserLang } from "@/lib/authI18n";
 
-const SESSION_KEY = "megsy_offers_carousel_seen_v3";
+const SESSION_KEY = "megsy_offers_carousel_seen_v4";
 const AUTOPLAY_MS = 4200;
 
 type Offer = {
   id: string;
-  image: string;
-  imageAr?: string;
+  visual: "gpt" | "computer" | "agent" | "seedance";
   title: string;
   titleAr: string;
   body: string;
@@ -17,40 +16,29 @@ type Offer = {
 };
 
 const OFFERS: Offer[] = [
-  {
-    id: "gpt_25",
-    image: "/offer-gpt-seedance.png",
-    title: "GPT 2.5 Unlimited",
-    titleAr: "GPT 2.5 بلا حدود",
-    body: "Use our flagship model without limits for a full month.",
-    bodyAr: "استخدم أقوى نماذجنا بلا حدود لمدة شهر كامل.",
-  },
-  {
-    id: "computer",
-    image: "/offer-computer-seedance.png",
-    title: "Megsy Computer",
-    titleAr: "ميغسي كومبيوتر",
-    body: "Let Megsy browse, click, research and get work done for you.",
-    bodyAr: "خلّي ميغسي يتصفح ويبحث وينفذ المهام بدلًا منك.",
-  },
-  {
-    id: "agent",
-    image: "/offer-agent-seedance.png",
-    title: "Megsy Agent",
-    titleAr: "وكيل ميغسي",
-    body: "Turn complex goals into finished work with an autonomous AI agent.",
-    bodyAr: "حوّل المهام المعقدة إلى شغل مكتمل مع وكيل ذكاء اصطناعي مستقل.",
-  },
-  {
-    id: "seedance_25",
-    image: "/seedance-2-5.jpeg",
-    imageAr: "/seedance-2-5-ar.png",
-    title: "Seedance 2.5 Unlimited",
-    titleAr: "Seedance 2.5 بلا حدود",
-    body: "Create videos freely for 7 full days for only $7.",
-    bodyAr: "أنشئ فيديوهاتك بحرية لمدة 7 أيام كاملة بـ7$ فقط.",
-  },
+  { id: "gpt_25", visual: "gpt", title: "GPT 2.5 Unlimited", titleAr: "GPT 2.5 بلا حدود", body: "Use our flagship model without limits for a full month.", bodyAr: "استخدم أقوى نماذجنا بلا حدود لمدة شهر كامل." },
+  { id: "computer", visual: "computer", title: "Megsy Computer", titleAr: "ميغسي كومبيوتر", body: "Let Megsy browse, click, research and get work done for you.", bodyAr: "خلّي ميغسي يتصفح ويبحث وينفذ المهام بدلًا منك." },
+  { id: "agent", visual: "agent", title: "Megsy Agent", titleAr: "وكيل ميغسي", body: "Turn complex goals into finished work with an autonomous AI agent.", bodyAr: "حوّل المهام المعقدة إلى شغل مكتمل مع وكيل ذكاء اصطناعي مستقل." },
+  { id: "seedance_25", visual: "seedance", title: "Seedance 2.5 Unlimited", titleAr: "Seedance 2.5 بلا حدود", body: "Create videos freely for 7 full days for only $7.", bodyAr: "أنشئ فيديوهاتك بحرية لمدة 7 أيام كاملة بـ7$ فقط." },
 ];
+
+function OfferVisual({ offer, isArabic }: { offer: Offer; isArabic: boolean }) {
+  const label = isArabic ? offer.titleAr : offer.title;
+  return (
+    <div className={`offer-visual offer-visual-${offer.visual}`} aria-label={label}>
+      <div className="offer-visual-glow" />
+      <div className="offer-visual-lines offer-visual-lines-one" />
+      <div className="offer-visual-lines offer-visual-lines-two" />
+      <div className="offer-visual-title">{label}</div>
+      <div className="offer-visual-mark" aria-hidden="true">
+        {offer.visual === "gpt" && "✦"}
+        {offer.visual === "computer" && "▣"}
+        {offer.visual === "agent" && "↗"}
+        {offer.visual === "seedance" && "▮▮"}
+      </div>
+    </div>
+  );
+}
 
 export default function SeedanceOfferDialog() {
   const location = useLocation();
@@ -73,18 +61,12 @@ export default function SeedanceOfferDialog() {
 
   useEffect(() => {
     if (!open) return;
-    const timer = window.setInterval(() => {
-      setActiveIndex((index) => (index + 1) % OFFERS.length);
-    }, AUTOPLAY_MS);
+    const timer = window.setInterval(() => setActiveIndex((index) => (index + 1) % OFFERS.length), AUTOPLAY_MS);
     return () => window.clearInterval(timer);
   }, [open]);
 
   const dismiss = () => {
-    try {
-      sessionStorage.setItem(SESSION_KEY, "1");
-    } catch {
-      // Session storage may be unavailable in private browsing.
-    }
+    try { sessionStorage.setItem(SESSION_KEY, "1"); } catch { /* storage unavailable */ }
     setOpen(false);
   };
 
@@ -94,10 +76,7 @@ export default function SeedanceOfferDialog() {
     navigate(offer.id === "computer" || offer.id === "agent" ? "/chat" : `/pricing?offer=${offer.id}`);
   };
 
-  const move = (direction: 1 | -1) => {
-    setActiveIndex((index) => (index + direction + OFFERS.length) % OFFERS.length);
-  };
-
+  const move = (direction: 1 | -1) => setActiveIndex((index) => (index + direction + OFFERS.length) % OFFERS.length);
   const current = OFFERS[activeIndex];
 
   return (
@@ -106,9 +85,8 @@ export default function SeedanceOfferDialog() {
         dir={isArabic ? "rtl" : "ltr"}
         className="offers-bottom-sheet fixed bottom-0 left-1/2 top-auto z-50 grid max-h-[90dvh] w-full max-w-[540px] translate-x-[-50%] translate-y-0 gap-0 overflow-y-auto rounded-t-[32px] rounded-b-none border-0 bg-[#f3f1ed] p-0 text-[#121212] shadow-[0_-14px_50px_rgba(0,0,0,0.2)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:slide-in-from-bottom-8 data-[state=closed]:slide-out-to-bottom-8 [&>button]:hidden"
       >
-        <div className="px-5 pb-8 pt-4 sm:px-9 sm:pb-10 sm:pt-5">
-          <div className="mx-auto h-1.5 w-12 rounded-full bg-[#4d4b50]" />
-          <div className="mt-4 flex min-h-2 justify-center gap-1.5" aria-label={isArabic ? "العروض" : "Offers"}>
+        <div className="px-5 pb-8 pt-5 sm:px-9 sm:pb-10">
+          <div className="flex min-h-2 justify-center gap-1.5" aria-label={isArabic ? "العروض" : "Offers"}>
             {OFFERS.map((offer, index) => (
               <button
                 key={offer.id}
@@ -122,9 +100,7 @@ export default function SeedanceOfferDialog() {
 
           <div
             className="mt-4 overflow-hidden rounded-[25px] bg-[#252525] shadow-[0_12px_30px_rgba(0,0,0,0.16)] touch-pan-y"
-            onPointerDown={(event) => {
-              touchStartX.current = event.clientX;
-            }}
+            onPointerDown={(event) => { touchStartX.current = event.clientX; }}
             onPointerUp={(event) => {
               if (touchStartX.current === null) return;
               const delta = event.clientX - touchStartX.current;
@@ -132,37 +108,18 @@ export default function SeedanceOfferDialog() {
               touchStartX.current = null;
             }}
           >
-            <img
-              key={current.image}
-              src={isArabic && current.imageAr ? current.imageAr : current.image}
-              alt={isArabic ? current.titleAr : current.title}
-              className="block h-[205px] w-full object-cover sm:h-[270px]"
-            />
+            <OfferVisual offer={current} isArabic={isArabic} />
           </div>
 
           <div className="mt-6 text-center">
-            <DialogTitle className="text-[24px] font-bold tracking-tight sm:text-[28px]">
-              {isArabic ? current.titleAr : current.title}
-            </DialogTitle>
-            <DialogDescription className="mx-auto mt-2 max-w-[430px] text-[15px] leading-7 text-[#6f6b70] sm:text-base">
-              {isArabic ? current.bodyAr : current.body}
-            </DialogDescription>
+            <DialogTitle className="text-[24px] font-bold tracking-tight sm:text-[28px]">{isArabic ? current.titleAr : current.title}</DialogTitle>
+            <DialogDescription className="mx-auto mt-2 max-w-[430px] text-[15px] leading-7 text-[#6f6b70] sm:text-base">{isArabic ? current.bodyAr : current.body}</DialogDescription>
           </div>
 
-          <button
-            type="button"
-            onClick={tryNow}
-            className="mt-6 h-[54px] w-full rounded-full bg-gradient-to-r from-[#f40b79] via-[#f32948] to-[#ff6b1f] text-base font-semibold text-white shadow-[0_8px_20px_rgba(243,34,91,0.18)] transition hover:brightness-105 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
-          >
+          <button type="button" onClick={tryNow} className="mt-6 h-[54px] w-full rounded-full bg-gradient-to-r from-[#f40b79] via-[#f32948] to-[#ff6b1f] text-base font-semibold text-white shadow-[0_8px_20px_rgba(243,34,91,0.18)] transition hover:brightness-105 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2">
             {isArabic ? "جرّب الآن" : "Try now"}
           </button>
-          <button
-            type="button"
-            onClick={dismiss}
-            className="mt-3 w-full text-[15px] font-medium text-[#d0443a] transition hover:text-[#a52e28]"
-          >
-            {isArabic ? "لاحقًا" : "Later"}
-          </button>
+          <button type="button" onClick={dismiss} className="mt-3 w-full text-[15px] font-medium text-[#d0443a] transition hover:text-[#a52e28]">{isArabic ? "لاحقًا" : "Later"}</button>
         </div>
       </DialogContent>
     </Dialog>

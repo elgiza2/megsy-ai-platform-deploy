@@ -3960,3 +3960,30 @@ body:has(.offers-bottom-sheet) [data-radix-dialog-overlay] {
   -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
 }
+
+/* Lightweight Seedance-style offer artwork: no network image payloads. */
+.offer-visual {
+  position: relative;
+  display: grid;
+  min-height: 205px;
+  place-items: center;
+  overflow: hidden;
+  isolation: isolate;
+  color: #fff;
+  background: #df8612;
+  background-image: radial-gradient(circle at 18% 20%, rgba(255, 220, 125, .5) 0 1px, transparent 2px), radial-gradient(circle at 72% 64%, rgba(107, 45, 0, .3) 0 1px, transparent 2px), linear-gradient(135deg, #8d4509, #efa31d 52%, #bd5c08);
+  background-size: 17px 17px, 23px 23px, 100% 100%;
+}
+.offer-visual::before, .offer-visual::after { content: ""; position: absolute; z-index: -1; border: 1px solid rgba(255,255,255,.25); border-radius: 999px; transform: rotate(-18deg); }
+.offer-visual::before { width: 120%; height: 90px; top: 8%; left: -10%; box-shadow: 0 0 45px rgba(255,215,98,.35); }
+.offer-visual::after { width: 85%; height: 130px; bottom: -20%; right: -12%; border-color: rgba(88,31,0,.24); }
+.offer-visual-gpt { background-image: radial-gradient(circle at 45% 48%, rgba(255,236,166,.6) 0 2px, transparent 3px), linear-gradient(135deg, #a95109, #f0a921 50%, #ca650b); }
+.offer-visual-computer { background-image: linear-gradient(105deg, transparent 35%, rgba(255,229,153,.3) 36% 37%, transparent 38%), linear-gradient(135deg, #9b4e0b, #ef9b18 55%, #b65708); }
+.offer-visual-agent { background-image: radial-gradient(circle at 22% 65%, rgba(255,232,154,.55) 0 2px, transparent 3px), linear-gradient(135deg, #a64b08, #ee9a16 50%, #c15b08); }
+.offer-visual-seedance { background-image: linear-gradient(115deg, transparent 35%, rgba(255,229,145,.42) 36% 38%, transparent 39%), linear-gradient(135deg, #9c4607, #f0a31b 52%, #c35c07); }
+.offer-visual-title { padding: 0 18px; text-align: center; font-size: clamp(28px, 6vw, 48px); font-weight: 700; letter-spacing: -.04em; text-shadow: 0 2px 8px rgba(85,34,0,.18); }
+.offer-visual-mark { position: absolute; top: 22px; left: 50%; transform: translateX(-50%); font-size: 30px; font-weight: 800; opacity: .92; }
+.offer-visual-lines { position: absolute; height: 1px; width: 48%; background: rgba(255,255,255,.25); }
+.offer-visual-lines-one { top: 34%; left: -8%; transform: rotate(17deg); }
+.offer-visual-lines-two { bottom: 24%; right: -8%; transform: rotate(-14deg); opacity: .65; }
+@media (min-width: 640px) { .offer-visual { min-height: 270px; } }
