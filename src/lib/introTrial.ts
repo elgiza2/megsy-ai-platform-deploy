@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 // v1/v2 were account-agnostic: one confirmed trial hid the offer for every
 // account (and every visitor) on that device. v3 is scoped per user id.
 const LOCAL_PREFIX = "megsy_intro_trial_used_v3:";
+const SEEDANCE_OFFER_KEY = "megsy_seedance_offer_checkout_v1";
 const LEGACY_KEYS = ["megsy_intro_trial_used_v1", "megsy_intro_trial_used_v2"];
 
 function dropLegacy() {
@@ -84,6 +85,16 @@ export function useIntroTrialEligible(): boolean {
   useEffect(() => {
     let cancelled = false;
     const check = async () => {
+      try {
+        const offer = new URLSearchParams(window.location.search).get("offer");
+        if (offer === "seedance_7day" || sessionStorage.getItem(SEEDANCE_OFFER_KEY) === "1") {
+          sessionStorage.setItem(SEEDANCE_OFFER_KEY, "1");
+          if (!cancelled) setEligible(false);
+          return;
+        }
+      } catch {
+        // Continue with account-based eligibility when storage is unavailable.
+      }
       const used = await hasUsedIntroTrial();
       if (!cancelled) setEligible(!used);
     };
