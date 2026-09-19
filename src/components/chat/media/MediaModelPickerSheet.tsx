@@ -41,6 +41,35 @@ interface Props {
   onSelect: (model: MediaModelChoice) => void;
 }
 
+const modelKey = (model: any) => `${model?.slug || model?.id || ""} ${model?.name || ""}`.toLowerCase();
+
+function englishModelName(model: any): string {
+  const key = modelKey(model);
+  if (/gpt[\s_-]*image[\s_-]*2[._ -]*5.*flare/i.test(key)) return "GPT Image 2.5 Flare";
+  if (/gpt[\s_-]*image[\s_-]*2[._ -]*5.*sunburst/i.test(key)) return "GPT Image 2.5 Sunburst";
+  if (/gpt[\s_-]*image[\s_-]*2[._ -]*5/i.test(key)) return "GPT Image 2.5";
+  if (/gen[\s_-]*4[._ -]*image[\s_-]*turbo/i.test(key)) return "Gen-4 Image Turbo";
+  if (/grok[\s_-]*imagine[\s_-]*image/i.test(key)) return "Grok Imagine Image 2";
+  if (/grok[\s_-]*image/i.test(key)) return "Grok Image";
+  if (/nano[\s_-]*banana[\s_-]*2/i.test(key)) return "Nano Banana 2";
+  if (/nano[\s_-]*banana/i.test(key)) return "Nano Banana";
+  if (/seedream[\s_-]*5.*lite/i.test(key)) return "Seedream 5 Lite";
+  if (/seedream[\s_-]*5.*(?:pro|5[._ -]*0)/i.test(key)) return "Seedream 5.0 Pro";
+  if (/sora[\s_-]*2/i.test(key)) return "Sora 2";
+  if (/seedance[\s_-]*2.*5/i.test(key)) return "Seedance 2.5";
+  if (/seedance[\s_-]*2/i.test(key)) return "Seedance 2";
+  if (/gen[\s_-]*4[._ -]*5/i.test(key)) return "Gen-4.5";
+  if (/veo[\s_-]*3[._ -]*1/i.test(key)) return "Veo 3.1";
+  return String(model.name || model.slug || model.id || "Model").replace(/\s*Free\s*/gi, " ").trim();
+}
+
+const IMAGE_ORDER = [
+  "GPT Image 2.5", "GPT Image 2.5 Flare", "GPT Image 2.5 Sunburst",
+  "Nano Banana 2", "Seedream 5 Lite", "Seedream 5.0 Pro",
+  "Grok Image", "Grok Imagine Image 2", "Gen-4 Image Turbo",
+];
+const VIDEO_ORDER = ["Sora 2", "Seedance 2.5", "Seedance 2", "Veo 3.1", "Gen-4.5"];
+
 export default function MediaModelPickerSheet({ open, onOpenChange, mode, selectedSlug, onSelect }: Props) {
   const { models, loading, error, reload } = useDynamicModels();
   const { plan } = useUserPlan();
@@ -50,8 +79,15 @@ export default function MediaModelPickerSheet({ open, onOpenChange, mode, select
   const filtered = useMemo(() => {
     const target = mode === "video" ? ["video", "video-i2v"] : ["image"];
     const scoped = models.filter((m) => target.includes(m.type as string));
-    const sorted = (mode === "video" ? filterVideoModels(scoped) : filterImageModels(scoped)).sort((a, b) => Number(!!b.isFeatured) - Number(!!a.isFeatured));
-    const unique = sorted.filter((model, index, list) => list.findIndex((candidate) => candidate.name.trim().toLowerCase() === model.name.trim().toLowerCase()) === index);
+    const order = mode === "video" ? VIDEO_ORDER : IMAGE_ORDER;
+    const sorted = (mode === "video" ? filterVideoModels(scoped) : filterImageModels(scoped)).sort((a, b) => {
+      const aName = englishModelName(a);
+      const bName = englishModelName(b);
+      const aRank = order.indexOf(aName);
+      const bRank = order.indexOf(bName);
+      return (aRank < 0 ? 999 : aRank) - (bRank < 0 ? 999 : bRank) || aName.localeCompare(bName);
+    });
+    const unique = sorted.filter((model, index, list) => list.findIndex((candidate) => englishModelName(candidate) === englishModelName(model)) === index);
     return mode === "video" ? unique.slice(0, 5) : unique;
   }, [models, mode]);
 
@@ -75,11 +111,12 @@ export default function MediaModelPickerSheet({ open, onOpenChange, mode, select
               const locked = mode === "video" && !paid;
               return <button key={m.id} type="button" onClick={() => {
                 if (locked) { promptUpgrade(m.name); onOpenChange(false); navigate("/pricing"); return; }
-                onSelect({ slug: m.slug || m.id, name: m.name, provider: m.provider, credits: m.credits, thumbnail: m.thumbnailUrl || m.iconUrl, type: mode === "video" ? "video" : "image", isPremium: !!m.isPremium });
-                toast.success(`Selected: ${m.name}`);
+                const displayName = englishModelName(m);
+                onSelect({ slug: m.slug || m.id, name: displayName, provider: m.provider, credits: m.credits, thumbnail: m.thumbnailUrl || m.iconUrl, type: mode === "video" ? "video" : "image", isPremium: !!m.isPremium });
+                toast.success(`Selected: ${displayName}`);
               }} className={`flex w-full items-center gap-3 rounded-2xl border px-3 py-3 text-left transition-colors hover:border-primary/40 hover:bg-primary/[0.035] ${active ? "border-primary/50 bg-primary/[0.07]" : "border-border/70 bg-card"}`}>
                 <ModelIcon model={m} />
-                <span className="min-w-0 flex-1 truncate text-[14px] font-semibold text-foreground">{m.name.replace(/\s*Free\s*/gi, " ").trim()}</span>
+                <span translate="no" dir="ltr" className="min-w-0 flex-1 truncate text-left text-[14px] font-semibold text-foreground">{englishModelName(m)}</span>
                 {active && <Check className="h-4 w-4 shrink-0 text-primary" strokeWidth={2.8} />}
               </button>;
             })}
