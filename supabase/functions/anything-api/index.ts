@@ -41,6 +41,8 @@ const RENDERFUL_I2I: Record<string, string> = {
 // Aliases: slugs older clients may send -> real catalogue slug.
 const SLUG_ALIASES: Record<string, string> = {
   "deapi-image": "deapi-flux-schnell",
+  gen4_image_turbo: "runway-gen4-image-turbo",
+  "gen4-image-turbo": "runway-gen4-image-turbo",
   "gpt-image-2": "renderful-gpt-image-2",
   "nano-banana-2": "renderful-nano-banana-2",
   "seedream-5": "renderful-seedream-4-5",

@@ -61,10 +61,11 @@ async function requestImage(
   refs: string[],
   aspectRatio?: string,
 ): Promise<string> {
+  const routerModelSlug = modelSlug === "gen4_image_turbo" ? "runway-gen4-image-turbo" : modelSlug;
   const { data, error } = await supabase.functions.invoke(IMAGE_FN, {
     body: {
       prompt: scene.prompt,
-      model_slug: modelSlug,
+      model_slug: routerModelSlug,
       num_images: 1,
       aspect_ratio: aspectRatio,
       ...(/^(?:runway[-_])?(gpt_image_2_5_flare|gpt_image_2_5_sunburst|seedream5_pro|gpt_image_2|grok_imagine_image_2|muse_image|gemini_image3\.1_flash|gen4_image_turbo)$/i.test(
