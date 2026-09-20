@@ -8,9 +8,9 @@ import type { MediaSceneResult } from "@/components/chat/media/MediaResultCard";
 import { isUnlimitedMediaModel } from "@/lib/mediaQuota";
 import { getRunwayVideoPolicy } from "@/lib/runwayModelPolicy";
 
-// The image router is deployed as `anything-api` (new function dirs can't be
-// created here; the legacy `media-image` deployment ignores model_slug).
-const IMAGE_FN = "anything-api";
+// Runway image generation is served by the dedicated compatibility function.
+// Gen-4 Image Turbo requires at least one reference image in Runway Dev.
+const IMAGE_FN = "media-image";
 
 // Video job pacing depends on the provider. Alibaba Wan runs ~5–6 min end
 // to end, so we show a visible countdown before polling. deAPI usually
@@ -62,6 +62,9 @@ async function requestImage(
   aspectRatio?: string,
 ): Promise<string> {
   const routerModelSlug = modelSlug === "gen4_image_turbo" ? "runway-gen4-image-turbo" : modelSlug;
+  if (/runway[-_]gen4[-_]image[-_]turbo|^gen4_image_turbo$/i.test(routerModelSlug) && refs.length === 0) {
+    throw new Error("Runway Gen-4 Image Turbo requires a reference image. Attach an image and try again.");
+  }
   const { data, error } = await supabase.functions.invoke(IMAGE_FN, {
     body: {
       prompt: scene.prompt,
@@ -100,8 +103,7 @@ async function generateImageScene(
   onPartial?: ScenePartialCb,
   aspectRatio?: string,
 ): Promise<string> {
-  // All image models go through the image-router edge function (deployed as
-  // `anything-api`; the legacy `media-image` deployment ignores model_slug).
+  // All image models go through the image router edge function.
   const stopTicker = startProgressTicker(scene.index, 18_000, onPartial);
   const refs: string[] = Array.isArray((scene as any).reference_image_urls)
     ? ((scene as any).reference_image_urls as string[])
@@ -120,6 +122,7 @@ async function generateImageScene(
         return url;
       } catch (e) {
         if ((e as any)?.paywall) throw e;
+        if (e instanceof Error && e.message.includes("requires a reference image")) throw e;
         lastErr = e;
       }
     }
