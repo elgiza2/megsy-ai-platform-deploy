@@ -1,0 +1,185 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { vaultKeys, noteKeyOk, noteKeyFail } from "./_shared/keyVault.ts";
+
+const db = createClient(
+  Deno.env.get("SUPABASE_URL")!,
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+  { auth: { persistSession: false } },
+);
+
+const cors = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
+const out = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...cors, "Content-Type": "application/json" },
+  });
+
+type Rule = { max: number; resolutions: string[]; durations: number[]; cost: number };
+const rules: Record<string, Rule> = {
+  "runway-gen4.5": { max: 10, resolutions: ["720p", "1080p"], durations: [5, 10], cost: 200 },
+  "runway-veo-3.1": { max: 8, resolutions: ["720p", "1080p"], durations: [4, 6, 8], cost: 240 },
+  "runway-seedance-2.5": { max: 5, resolutions: ["720p"], durations: [5], cost: 160 },
+  "runway-seedance-2.0-mini": { max: 10, resolutions: ["720p", "1080p"], durations: [5, 10], cost: 110 },
+  "runway-minimax-h3": { max: 15, resolutions: ["2k"], durations: [5, 10, 15], cost: 300 },
+  "runway-gemini-omni-flash-1.1": { max: 10, resolutions: ["720p"], durations: [5, 10], cost: 180 },
+};
+
+function ratio(aspectRatio?: string) {
+  if (aspectRatio === "9:16") return "720:1280";
+  if (aspectRatio === "1:1") return "720:720";
+  return "1280:720";
+}
+
+async function createRunwayTask(
+  key: string,
+  model: string,
+  prompt: string,
+  image: string | undefined,
+  duration: number,
+  aspectRatio: string | undefined,
+) {
+  const body: Record<string, unknown> = {
+    model: model.replace(/^runway-/, ""),
+    promptText: prompt,
+    ratio: ratio(aspectRatio),
+    duration,
+  };
+  if (image) body.promptImage = image;
+
+  const response = await fetch("https://api.dev.runwayml.com/v1/image_to_video", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${key}`,
+      "X-Runway-Version": "2024-11-06",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  const text = await response.text();
+  if (!response.ok) throw new Error(`Runway ${response.status}: ${text.slice(0, 240)}`);
+  const result = JSON.parse(text);
+  const id = result.id ?? result.task_id;
+  if (!id) throw new Error("Runway returned no task id");
+  return String(id);
+}
+
+Deno.serve(async (request) => {
+  if (request.method === "OPTIONS") return new Response("ok", { headers: cors });
+
+  let body: Record<string, unknown> = {};
+  try {
+    body = await request.json();
+  } catch {
+    return out({ error: true, message: "invalid json" }, 400);
+  }
+
+  const token = (request.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
+  const { data: authData } = token
+    ? await db.auth.getUser(token)
+    : { data: { user: null } } as any;
+  const user = authData?.user;
+  if (!user) return out({ error: true, paywall: true, message: "Sign in to generate videos." }, 401);
+
+  const model = String(body.model_slug || "runway-gen4.5");
+  const rule = rules[model];
+  if (!rule) return out({ error: true, message: "Choose a supported Runway video model." }, 400);
+
+  const duration = Number(body.duration || rule.durations[0]);
+  const resolution = String(body.resolution || rule.resolutions[0]).toLowerCase();
+  if (
+    duration > rule.max ||
+    !rule.durations.includes(duration) ||
+    !rule.resolutions.includes(resolution)
+  ) {
+    return out(
+      {
+        error: true,
+        message: `${model}: allowed durations ${rule.durations.join(", ")} and resolutions ${rule.resolutions.join(", ")}.`,
+      },
+      400,
+    );
+  }
+
+  const prompt = String(body.prompt || "").trim();
+  if (!prompt) return out({ error: true, message: "prompt is required" }, 400);
+
+  // Check provider availability before charging the user.
+  const keys = await vaultKeys("runway");
+  if (!keys.length) {
+    return out({ error: true, message: "No Runway key is configured. Add one from the Telegram admin bot." }, 503);
+  }
+
+  const quota = await db.rpc("consume_video_quota", {
+    _model: model,
+    _unlimited: false,
+    _user_id: user.id,
+  });
+  if (quota.error || !quota.data?.allowed) {
+    return out(
+      {
+        error: true,
+        paywall: true,
+        message: quota.data?.message || quota.data?.error || quota.error?.message || "Video credits required.",
+      },
+      402,
+    );
+  }
+
+  const cost = Number(quota.data.cost || rule.cost);
+  const spent = await db.rpc("spend_credits_auto", {
+    p_user_id: user.id,
+    p_amount: cost,
+    p_action_type: "video_generation",
+    p_description: `${model} ${duration}s`,
+  });
+  if (spent.error || spent.data?.success === false) {
+    return out({ error: true, paywall: true, message: spent.data?.error || "Insufficient credits." }, 402);
+  }
+
+  const key = keys[0];
+  try {
+    const generationId = await createRunwayTask(
+      key.key,
+      model,
+      prompt,
+      typeof body.start_frame === "string" ? body.start_frame : undefined,
+      duration,
+      typeof body.aspect_ratio === "string" ? body.aspect_ratio : undefined,
+    );
+    const { data: job, error: jobError } = await db
+      .from("pending_video_jobs")
+      .insert({
+        user_id: user.id,
+        provider: "runway",
+        model_slug: model,
+        generation_id: generationId,
+        api_key_id: key.id,
+        credits_charged: cost,
+        prompt,
+        duration_seconds: duration,
+        resolution,
+        status: "pending",
+      })
+      .select("id")
+      .single();
+    if (jobError) throw new Error(jobError.message);
+    await noteKeyOk(key.id);
+    return out({ job_id: job.id, provider: "runway", model_slug: model, credits_charged: cost });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Runway request failed";
+    await noteKeyFail(key.id, message);
+    // Never charge for a provider request that did not create a trackable job.
+    await db.rpc("grant_user_credits", {
+      p_user_id: user.id,
+      p_amount: cost,
+      p_action_type: "video_generation_refund",
+      p_description: `Refund for failed ${model} request`,
+    });
+    return out({ error: true, message }, 502);
+  }
+});

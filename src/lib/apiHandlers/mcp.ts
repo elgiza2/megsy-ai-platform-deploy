@@ -18,8 +18,15 @@ export default async function handler(req: Request): Promise<Response> {
   if (!guard.ok) return guardResponse(guard, headers);
 
   const body = (await req.json().catch(() => null)) as GatewayPayload | null;
+  const token = req.headers
+    .get("authorization")
+    ?.replace(/^Bearer\s+/i, "")
+    .trim();
+  // The verified Authorization header is the only source of identity. A body
+  // token must never be able to select another user's MCP connections.
+  const authenticatedBody = body ? { ...body, token } : body;
   try {
-    const result = await handleMcpGateway(body);
+    const result = await handleMcpGateway(authenticatedBody);
     return new Response(JSON.stringify(result.body), { status: result.status, headers });
   } catch (err) {
     return new Response(

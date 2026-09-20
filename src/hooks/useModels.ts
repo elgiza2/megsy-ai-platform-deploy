@@ -126,6 +126,8 @@ const HIDDEN_VIDEO_MODEL_IDS = new Set([
 ]);
 
 const PREFERRED_VIDEO_MODEL_IDS = [
+  "runway-gen4.5",
+  "renderful-runway-gen4-turbo",
   "deapi-ltx-video",
   "renderful-google-veo-3.1",
   "renderful-sora-2",
@@ -134,8 +136,6 @@ const PREFERRED_VIDEO_MODEL_IDS = [
   "renderful-google-veo-3.1-fast",
   "renderful-wan-2.6",
 ];
-
-
 
 const PROVIDER_ORDER = [
   "runbase",
@@ -179,11 +179,15 @@ const providerKey = (provider?: string) => (provider || "other").toLowerCase();
 
 export function getModelProviderLabel(provider?: string): string {
   const key = providerKey(provider);
-  return (key in PROVIDER_LABELS ? PROVIDER_LABELS[key] : undefined) ??
-    key.charAt(0).toUpperCase() + key.slice(1);
+  return (
+    (key in PROVIDER_LABELS ? PROVIDER_LABELS[key] : undefined) ??
+    key.charAt(0).toUpperCase() + key.slice(1)
+  );
 }
 
-export function isHiddenMediaModel(model: Pick<ModelDetail, "id" | "slug" | "name" | "type"> & { provider?: string }): boolean {
+export function isHiddenMediaModel(
+  model: Pick<ModelDetail, "id" | "slug" | "name" | "type"> & { provider?: string },
+): boolean {
   const id = String(model.slug || model.id || "").toLowerCase();
   const name = String(model.name || "");
   const provider = String(model.provider || "").toLowerCase();
@@ -191,7 +195,10 @@ export function isHiddenMediaModel(model: Pick<ModelDetail, "id" | "slug" | "nam
     return true;
   }
   if (model.type === "image") {
-    return HIDDEN_IMAGE_TOOL_IDS.has(id) || HIDDEN_IMAGE_TOOL_PATTERNS.some((pattern) => pattern.test(name) || pattern.test(id));
+    return (
+      HIDDEN_IMAGE_TOOL_IDS.has(id) ||
+      HIDDEN_IMAGE_TOOL_PATTERNS.some((pattern) => pattern.test(name) || pattern.test(id))
+    );
   }
   if (model.type === "video" || model.type === "video-i2v") {
     return HIDDEN_VIDEO_MODEL_IDS.has(id);
@@ -221,7 +228,8 @@ export function sortMediaModels<T extends ModelDetail>(models: T[], mode: "image
 
     const providerA = PROVIDER_ORDER.indexOf(providerKey(a.provider));
     const providerB = PROVIDER_ORDER.indexOf(providerKey(b.provider));
-    if (providerA !== providerB) return (providerA === -1 ? 999 : providerA) - (providerB === -1 ? 999 : providerB);
+    if (providerA !== providerB)
+      return (providerA === -1 ? 999 : providerA) - (providerB === -1 ? 999 : providerB);
 
     const featured = Number(!!b.isFeatured) - Number(!!a.isFeatured);
     if (featured) return featured;
@@ -233,7 +241,9 @@ export function sortMediaModels<T extends ModelDetail>(models: T[], mode: "image
   });
 }
 
-export function groupModelsByProvider<T extends ModelDetail>(models: T[]): Array<{ provider: string; label: string; models: T[] }> {
+export function groupModelsByProvider<T extends ModelDetail>(
+  models: T[],
+): Array<{ provider: string; label: string; models: T[] }> {
   const grouped = models.reduce<Record<string, T[]>>((acc, model) => {
     const key = providerKey(model.provider);
     (acc[key] ||= []).push(model);
@@ -246,7 +256,11 @@ export function groupModelsByProvider<T extends ModelDetail>(models: T[]): Array
       const rankB = PROVIDER_ORDER.indexOf(b);
       return (rankA === -1 ? 999 : rankA) - (rankB === -1 ? 999 : rankB) || a.localeCompare(b);
     })
-    .map((provider) => ({ provider, label: getModelProviderLabel(provider), models: grouped[provider] }));
+    .map((provider) => ({
+      provider,
+      label: getModelProviderLabel(provider),
+      models: grouped[provider],
+    }));
 }
 
 function orderVisibleModels(models: ModelDetail[]): ModelDetail[] {
@@ -266,7 +280,7 @@ function imageRowToModelDetail(r: any): ModelDetail {
   const badges: string[] = [];
   if (r.is_new) badges.push("NEW");
   // Premium flag comes from the DB; fall back to cost when unset.
-  const isPremium = r.is_premium ?? (Number(r.unit_cost_usd) > 0);
+  const isPremium = r.is_premium ?? Number(r.unit_cost_usd) > 0;
   badges.push(isPremium ? "PRO" : "FREE");
   if (r.supports_multi_image) badges.push("Multi-Image");
   const topRes = Array.isArray(r.supported_resolutions)
@@ -311,7 +325,6 @@ function imageRowToModelDetail(r: any): ModelDetail {
     isFeatured: !!r.is_featured,
   };
 }
-
 
 function videoRowToModelDetail(r: any): ModelDetail {
   const badges: string[] = [];
@@ -380,8 +393,12 @@ function videoRowToModelDetail(r: any): ModelDetail {
 function alibabaRowToModelDetail(r: any): ModelDetail {
   const mode = String(r.mode || "t2v").toLowerCase();
   const isImageInput = mode === "i2v" || mode === "r2v";
-  const isHappyHorse = String(r.model_id_api || "").toLowerCase().startsWith("happyhorse-");
-  const resolutions: string[] = Array.isArray(r.supported_resolutions) ? r.supported_resolutions : [];
+  const isHappyHorse = String(r.model_id_api || "")
+    .toLowerCase()
+    .startsWith("happyhorse-");
+  const resolutions: string[] = Array.isArray(r.supported_resolutions)
+    ? r.supported_resolutions
+    : [];
   const badges: string[] = ["FREE"];
   if (r.is_featured) badges.push("FAST");
   const topRes = resolutions[resolutions.length - 1];
@@ -396,7 +413,12 @@ function alibabaRowToModelDetail(r: any): ModelDetail {
     description: r.description || `${cleanName} · Wan video`,
     longDescription: r.description || `${cleanName} via Alibaba Model Studio (Wan).`,
     icon: "Video",
-    modes: mode === "r2v" ? ["reference-to-video"] : isImageInput ? ["image-to-video"] : ["text-to-video"],
+    modes:
+      mode === "r2v"
+        ? ["reference-to-video"]
+        : isImageInput
+          ? ["image-to-video"]
+          : ["text-to-video"],
     acceptsImages: isImageInput,
     requiresImage: isImageInput,
     maxImages: mode === "r2v" ? 3 : isImageInput ? 1 : 0,
@@ -423,30 +445,59 @@ function alibabaRowToModelDetail(r: any): ModelDetail {
 
 // Runway Dev catalogue fallback; remote model tables remain authoritative.
 const RUNWAY_VIDEO_MODELS: Array<[string, string]> = [
-  ["gen4.5", "Gen-4.5"], ["veo3.1", "Veo 3.1"], ["seedance2_5", "Seedance 2.5"],
-  ["seedance2_mini", "Seedance 2.0 Mini"], ["h3_max", "MiniMax H3"],
+  ["gen4.5", "Gen-4.5"],
+  ["veo3.1", "Veo 3.1"],
+  ["seedance2_5", "Seedance 2.5"],
+  ["seedance2_mini", "Seedance 2.0 Mini"],
+  ["h3_max", "MiniMax H3"],
   ["gemini_omni_flash", "Gemini Omni Flash 1.1"],
 ];
 const RUNWAY_IMAGE_MODELS: Array<[string, string]> = [
-  ["gpt_image_2_5_flare", "GPT Image 2.5 Flare"], ["gpt_image_2_5_sunburst", "GPT Image 2.5 Sunburst"],
-  ["seedream5_pro", "Seedream 5.0 Pro"], ["gpt_image_2", "GPT Image 2"],
-  ["grok_imagine_image_2", "Grok Imagine Image 2"], ["muse_image", "Muse Image"],
-  ["gemini_image3.1_flash", "Nano Banana 2"], ["gen4_image_turbo", "Gen-4 Image Turbo"],
+  ["gpt_image_2_5_flare", "GPT Image 2.5 Flare"],
+  ["gpt_image_2_5_sunburst", "GPT Image 2.5 Sunburst"],
+  ["seedream5_pro", "Seedream 5.0 Pro"],
+  ["gpt_image_2", "GPT Image 2"],
+  ["grok_imagine_image_2", "Grok Imagine Image 2"],
+  ["muse_image", "Muse Image"],
+  ["gemini_image3.1_flash", "Nano Banana 2"],
+  ["gen4_image_turbo", "Gen-4 Image Turbo"],
 ];
 function runwayFallbackModels(): ModelDetail[] {
   const base = (slug: string, name: string, type: "image" | "video"): ModelDetail => ({
-    id: `runway-${slug}`, slug, name, type, credits: 1, description: `${name} via Runway Dev`,
-    longDescription: `${name} from the official Runway Dev catalogue.`, icon: type === "video" ? "Video" : "Image",
-    modes: type === "video" ? ["text-to-video", "image-to-video"] : ["text-to-image", "image-to-image"], acceptsImages: true,
-    requiresImage: false, maxImages: type === "video" ? 1 : 4, acceptedMimeTypes: ["image/jpeg", "image/png", "image/webp"],
-    provider: "runway", speed: "standard", quality: "high", iconUrl: PROVIDER_LOGO.runway, badges: ["RUNWAY"],
-    isPremium: true, isNew: true, isFeatured: /gen-4\.5|veo 3\.1|gpt image|gen-4 image|seedance 2\.5/i.test(name),
+    id: `runway-${slug}`,
+    slug,
+    name,
+    type,
+    credits: 1,
+    description: `${name} via Runway Dev`,
+    longDescription: `${name} from the official Runway Dev catalogue.`,
+    icon: type === "video" ? "Video" : "Image",
+    modes:
+      type === "video" ? ["text-to-video", "image-to-video"] : ["text-to-image", "image-to-image"],
+    acceptsImages: true,
+    requiresImage: false,
+    maxImages: type === "video" ? 1 : 4,
+    acceptedMimeTypes: ["image/jpeg", "image/png", "image/webp"],
+    provider: "runway",
+    speed: "standard",
+    quality: "high",
+    iconUrl: PROVIDER_LOGO.runway,
+    badges: ["RUNWAY"],
+    isPremium: true,
+    isNew: true,
+    isFeatured: /gen-4\.5|veo 3\.1|gpt image|gen-4 image|seedance 2\.5/i.test(name),
   });
-  return [...RUNWAY_IMAGE_MODELS.map(([slug, name]) => base(slug, name, "image")), ...RUNWAY_VIDEO_MODELS.map(([slug, name]) => base(slug, name, "video"))];
+  return [
+    ...RUNWAY_IMAGE_MODELS.map(([slug, name]) => base(slug, name, "image")),
+    ...RUNWAY_VIDEO_MODELS.map(([slug, name]) => base(slug, name, "video")),
+  ];
 }
 function mergeRunwayFallbacks(models: ModelDetail[]): ModelDetail[] {
   const known = new Set(models.map((m) => `${m.provider}:${m.slug || m.id}`));
-  return [...models, ...runwayFallbackModels().filter((m) => !known.has(`${m.provider}:${m.slug || m.id}`))];
+  return [
+    ...models,
+    ...runwayFallbackModels().filter((m) => !known.has(`${m.provider}:${m.slug || m.id}`)),
+  ];
 }
 
 const MODELS_CACHE_KEY = "megsy_cache_dynamic_models_v9";
@@ -537,14 +588,15 @@ export function useDynamicModels() {
         if (aliRes.error) console.error("Failed to load Alibaba video models:", aliRes.error);
 
         const imageModels = withCuratedImageModels(
-          [...mergeRunwayFallbacks((imgRes.data ?? []).map(imageRowToModelDetail)), ...readLocalImageModels()]
-            .filter((m) => m.type === "image"),
+          [
+            ...mergeRunwayFallbacks((imgRes.data ?? []).map(imageRowToModelDetail)),
+            ...readLocalImageModels(),
+          ].filter((m) => m.type === "image"),
         );
         const videoModels = [
           ...(vidRes.data ?? []).map(videoRowToModelDetail),
           ...(aliRes?.data ?? []).map(alibabaRowToModelDetail),
         ].concat(mergeRunwayFallbacks([]).filter((m) => m.type === "video"));
-
 
         const memories = memRes.data ?? [];
         const hiddenRaw = memories.find((m: any) => m.key === "models_hidden");

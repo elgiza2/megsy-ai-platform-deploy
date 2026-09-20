@@ -1,5 +1,10 @@
 import { Route, Navigate } from "react-router-dom";
-import { LegacyToolsRedirect, LegacyAiRedirect, ProtectedRoute, RetiredRedirect } from "./routeHelpers";
+import {
+  LegacyToolsRedirect,
+  LegacyAiRedirect,
+  ProtectedRoute,
+  RetiredRedirect,
+} from "./routeHelpers";
 import { AnimatedShell } from "./AnimatedShell";
 import {
   // chat
@@ -100,19 +105,35 @@ export const AppRoutes = ({ currentUserId }: { currentUserId: string | null }) =
       <Route path="/r/:code" element={<ReferralRedirectPage />} />
       <Route
         path="/settings/change-email"
-        element={<ProtectedRoute><ChangeEmailPage /></ProtectedRoute>}
+        element={
+          <ProtectedRoute>
+            <ChangeEmailPage />
+          </ProtectedRoute>
+        }
       />
       <Route
         path="/settings/change-password"
-        element={<ProtectedRoute><ChangePasswordPage /></ProtectedRoute>}
+        element={
+          <ProtectedRoute>
+            <ChangePasswordPage />
+          </ProtectedRoute>
+        }
       />
       <Route
         path="/settings/two-factor"
-        element={<ProtectedRoute><TwoFactorPage /></ProtectedRoute>}
+        element={
+          <ProtectedRoute>
+            <TwoFactorPage />
+          </ProtectedRoute>
+        }
       />
       <Route
         path="/settings/delete-account"
-        element={<ProtectedRoute><DeleteAccountPage /></ProtectedRoute>}
+        element={
+          <ProtectedRoute>
+            <DeleteAccountPage />
+          </ProtectedRoute>
+        }
       />
     </Route>
 
@@ -120,57 +141,274 @@ export const AppRoutes = ({ currentUserId }: { currentUserId: string | null }) =
     <Route element={<AnimatedShell />}>
       <Route
         path="/settings/billing"
-        element={<ProtectedRoute><BillingPage /></ProtectedRoute>}
+        element={
+          <ProtectedRoute>
+            <BillingPage />
+          </ProtectedRoute>
+        }
       />
       <Route path="/billing/success" element={<BillingSuccessPage />} />
       <Route path="/suc" element={<BillingSuccessPage />} />
       <Route path="/settings/referrals" element={<Navigate to="/referrals" replace />} />
-      <Route path="/settings/referrals/resources" element={<Navigate to="/referrals/resources" replace />} />
+      <Route
+        path="/settings/referrals/resources"
+        element={<Navigate to="/referrals/resources" replace />}
+      />
     </Route>
 
     {/* Integrations are managed from the chat composer sheet now. */}
 
     {/* ── Settings ──────────────────────────────────────────── */}
-    <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-    <Route path="/settings/customization" element={<ProtectedRoute><CustomizationPage /></ProtectedRoute>} />
-    <Route path="/settings/ai-personalization" element={<ProtectedRoute><AIPersonalizationPage /></ProtectedRoute>} />
+    <Route
+      path="/settings"
+      element={
+        <ProtectedRoute>
+          <SettingsPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/settings/customization"
+      element={
+        <ProtectedRoute>
+          <CustomizationPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/settings/ai-personalization"
+      element={
+        <ProtectedRoute>
+          <AIPersonalizationPage />
+        </ProtectedRoute>
+      }
+    />
     <Route path="/settings/profile" element={<Navigate to="/settings/profile/edit" replace />} />
-    <Route path="/settings/profile/edit" element={<ProtectedRoute><ProfileEditPage /></ProtectedRoute>} />
-    <Route path="/settings/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
-    <Route path="/usage" element={<ProtectedRoute><UsagePage /></ProtectedRoute>} />
-    <Route path="/notifications" element={<ProtectedRoute><NotificationsInboxPage /></ProtectedRoute>} />
-    <Route path="/settings/security" element={<ProtectedRoute><SecuritySettingsPage /></ProtectedRoute>} />
-    <Route path="/settings/language" element={<ProtectedRoute><LanguagePage /></ProtectedRoute>} />
+    <Route
+      path="/settings/profile/edit"
+      element={
+        <ProtectedRoute>
+          <ProfileEditPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/settings/notifications"
+      element={
+        <ProtectedRoute>
+          <NotificationsPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/usage"
+      element={
+        <ProtectedRoute>
+          <UsagePage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/notifications"
+      element={
+        <ProtectedRoute>
+          <NotificationsInboxPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/settings/security"
+      element={
+        <ProtectedRoute>
+          <SecuritySettingsPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/settings/language"
+      element={
+        <ProtectedRoute>
+          <LanguagePage />
+        </ProtectedRoute>
+      }
+    />
     {/* Mail is hidden until its UI is reworked — both entries land on chat. */}
     <Route path="/settings/mail" element={<Navigate to="/chat" replace />} />
-    <Route path="/settings/passwords" element={<ProtectedRoute><PasswordsPage /></ProtectedRoute>} />
-    <Route path="/settings/mcp" element={<ProtectedRoute><McpSettingsPage /></ProtectedRoute>} />
-    <Route path="/mcp-callback" element={<ProtectedRoute><McpCallbackPage /></ProtectedRoute>} />
-    <Route path="/settings/memory" element={<ProtectedRoute><KnowledgePage /></ProtectedRoute>} />
+    <Route
+      path="/settings/passwords"
+      element={
+        <ProtectedRoute>
+          <PasswordsPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/settings/mcp"
+      element={
+        <ProtectedRoute>
+          <McpSettingsPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/mcp-callback"
+      element={
+        <ProtectedRoute>
+          <McpCallbackPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/settings/memory"
+      element={
+        <ProtectedRoute>
+          <KnowledgePage />
+        </ProtectedRoute>
+      }
+    />
     <Route path="/settings/knowledge" element={<Navigate to="/settings/memory" replace />} />
 
-    <Route path="/settings/skills" element={<ProtectedRoute><SkillsSettingsPage /></ProtectedRoute>} />
-    <Route path="/settings/skills/new" element={<ProtectedRoute><SkillsNewPage /></ProtectedRoute>} />
-    <Route path="/settings/skills/library" element={<ProtectedRoute><SkillsLibraryPage /></ProtectedRoute>} />
-    <Route path="/skills" element={<ProtectedRoute><SkillsSettingsPage /></ProtectedRoute>} />
-    <Route path="/settings/support" element={<ProtectedRoute><SettingsSupportPage /></ProtectedRoute>} />
-    <Route path="/settings/support/help" element={<ProtectedRoute><SettingsHelpPage /></ProtectedRoute>} />
-    <Route path="/settings/support/contact" element={<ProtectedRoute><SettingsContactPage /></ProtectedRoute>} />
-    <Route path="/settings/data" element={<ProtectedRoute><DataControlsPage /></ProtectedRoute>} />
-    <Route path="/settings/data/:category" element={<ProtectedRoute><DataCategoryPage /></ProtectedRoute>} />
-    <Route path="/settings/privacy" element={<ProtectedRoute><SettingsPrivacyPage /></ProtectedRoute>} />
-    <Route path="/settings/capabilities" element={<ProtectedRoute><CapabilitiesPage /></ProtectedRoute>} />
-    <Route path="/settings/cloud-browser" element={<ProtectedRoute><CloudBrowserPage /></ProtectedRoute>} />
+    <Route
+      path="/settings/skills"
+      element={
+        <ProtectedRoute>
+          <SkillsSettingsPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/settings/skills/new"
+      element={
+        <ProtectedRoute>
+          <SkillsNewPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/settings/skills/library"
+      element={
+        <ProtectedRoute>
+          <SkillsLibraryPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/skills"
+      element={
+        <ProtectedRoute>
+          <SkillsSettingsPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/settings/support"
+      element={
+        <ProtectedRoute>
+          <SettingsSupportPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/settings/support/help"
+      element={
+        <ProtectedRoute>
+          <SettingsHelpPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/settings/support/contact"
+      element={
+        <ProtectedRoute>
+          <SettingsContactPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/settings/data"
+      element={
+        <ProtectedRoute>
+          <DataControlsPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/settings/data/:category"
+      element={
+        <ProtectedRoute>
+          <DataCategoryPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/settings/privacy"
+      element={
+        <ProtectedRoute>
+          <SettingsPrivacyPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/settings/capabilities"
+      element={
+        <ProtectedRoute>
+          <CapabilitiesPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/settings/cloud-browser"
+      element={
+        <ProtectedRoute>
+          <CloudBrowserPage />
+        </ProtectedRoute>
+      }
+    />
     {/* Hidden from settings navigation — reachable only via the test route */}
-    <Route path="/test/desktop-bridge" element={<ProtectedRoute><DesktopBridgePage /></ProtectedRoute>} />
-    <Route path="/settings/desktop-bridge" element={<ProtectedRoute><DesktopBridgePage /></ProtectedRoute>} />
-    <Route path="/settings/system-status" element={<ProtectedRoute><SystemStatusPage /></ProtectedRoute>} />
+    <Route
+      path="/test/desktop-bridge"
+      element={
+        <ProtectedRoute>
+          <DesktopBridgePage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/settings/desktop-bridge"
+      element={
+        <ProtectedRoute>
+          <DesktopBridgePage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/settings/system-status"
+      element={
+        <ProtectedRoute>
+          <SystemStatusPage />
+        </ProtectedRoute>
+      }
+    />
     {/* Keep the settings destination compatible with older mobile links. */}
     <Route path="/settings/integrations" element={<Navigate to="/chat?integrations=1" replace />} />
 
     {/* ── Research previews ─────────────────────────────────── */}
-    <Route path="/research/preview/new" element={<ProtectedRoute><ResearchPreviewPage /></ProtectedRoute>} />
-    <Route path="/research/preview/:id" element={<ProtectedRoute><ResearchPreviewPage /></ProtectedRoute>} />
+    <Route
+      path="/research/preview/new"
+      element={
+        <ProtectedRoute>
+          <ResearchPreviewPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/research/preview/:id"
+      element={
+        <ProtectedRoute>
+          <ResearchPreviewPage />
+        </ProtectedRoute>
+      }
+    />
     <Route path="/research/share/:token" element={<ResearchPreviewPage />} />
 
     {/* ── Documents & slides previews ───────────────────────── */}
@@ -183,9 +421,7 @@ export const AppRoutes = ({ currentUserId }: { currentUserId: string | null }) =
     <Route path="/l" element={<ImageModelsPage />} />
     <Route path="/l/*" element={<ImageModelsPage />} />
 
-
     {/* ── Retired routes ────────────────────────────────────── */}
-
 
     {/* ── Pricing (only surviving marketing page) ───────────── */}
     <Route path="/pricing" element={<PricingPage />} />
@@ -198,23 +434,22 @@ export const AppRoutes = ({ currentUserId }: { currentUserId: string | null }) =
     <Route path="/status" element={toChat} />
     <Route path="/ai-chat" element={toChat} />
     <Route path="/ai-chat/*" element={toChat} />
-    <Route path="/features-guide" element={toChat} />
-    <Route path="/megsy-model" element={toChat} />
+    <Route path="/features-guide" element={toPricing} />
+    <Route path="/megsy-model" element={toPricing} />
     <Route path="/megay" element={toChat} />
     <Route path="/vs/:slug" element={toChat} />
     <Route path="/about" element={<LegalPage slug="about" />} />
     <Route path="/contact" element={<LegalPage slug="contact" />} />
-    <Route path="/support" element={toChat} />
+    <Route path="/support" element={<Navigate to="/settings/support/help" replace />} />
     <Route path="/enterprise" element={toPricing} />
-    <Route path="/trust" element={toChat} />
+    <Route path="/trust" element={<Navigate to="/security" replace />} />
     <Route path="/terms" element={<LegalPage slug="terms" />} />
     <Route path="/privacy" element={<LegalPage slug="privacy" />} />
-    <Route path="/cookies" element={toChat} />
+    <Route path="/cookies" element={<Navigate to="/privacy" replace />} />
     <Route path="/refund" element={<LegalPage slug="refund" />} />
     <Route path="/restore" element={<RestorePurchasePage />} />
-    <Route path="/policies/*" element={toChat} />
-    <Route path="/legal/*" element={toChat} />
-
+    <Route path="/policies/*" element={<Navigate to="/privacy" replace />} />
+    <Route path="/legal/*" element={<Navigate to="/privacy" replace />} />
 
     {/* ── Legacy aliases — everything retired now redirects ──── */}
     <Route path="/landing" element={toChat} />
@@ -264,14 +499,28 @@ export const AppRoutes = ({ currentUserId }: { currentUserId: string | null }) =
     <Route path="/comparison" element={toPricing} />
     <Route path="/megsy" element={<Navigate to="/megsy-model" replace />} />
     <Route path="/features" element={<Navigate to="/features-guide" replace />} />
-    <Route path="/compliance" element={<Navigate to="/legal/compliance" replace />} />
+    <Route path="/compliance" element={<Navigate to="/privacy" replace />} />
     <Route path="/billing" element={<Navigate to="/settings/billing" replace />} />
     <Route path="/k" element={<KPage />} />
     <Route path="/billing/referrals" element={<Navigate to="/referrals" replace />} />
-    <Route path="/referrals" element={<ProtectedRoute><ReferralsPage /></ProtectedRoute>}>
+    <Route
+      path="/referrals"
+      element={
+        <ProtectedRoute>
+          <ReferralsPage />
+        </ProtectedRoute>
+      }
+    >
       <Route index element={<ReferralsDashboardTab />} />
     </Route>
-    <Route path="/referrals/resources" element={<ProtectedRoute><ReferralResourcesPage /></ProtectedRoute>} />
+    <Route
+      path="/referrals/resources"
+      element={
+        <ProtectedRoute>
+          <ReferralResourcesPage />
+        </ProtectedRoute>
+      }
+    />
     {/* Sidebar destinations shared as short links must resolve, not 404. */}
     <Route path="/earn" element={<Navigate to="/referrals" replace />} />
     {/* Mail page is hidden until reworked; keep the import wired for the restore. */}

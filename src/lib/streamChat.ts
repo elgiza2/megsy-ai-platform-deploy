@@ -361,7 +361,9 @@ export async function streamChat({
           activeAgent ? `agent=${activeAgent}` : "",
           activeSkill ? "skill=enabled" : "",
           "escalate to the full service lane when tools, files, browsing, media, code, slides, or integrations are required",
-        ].filter(Boolean).join("; "),
+        ]
+          .filter(Boolean)
+          .join("; "),
       });
       return outcome === "answered" && receivedAnyContent;
     } catch {
@@ -403,7 +405,9 @@ export async function streamChat({
           activeSkill ? "skill=enabled" : "",
           hasConnectedTools ? "connected_integrations=available" : "",
           "you are the front-door router; escalate to the full agent for tools, files, browsing, images, video, slides, code, or integrations",
-        ].filter(Boolean).join("; "),
+        ]
+          .filter(Boolean)
+          .join("; "),
       });
 
       if (outcome === "answered") {
@@ -811,8 +815,15 @@ export async function streamChat({
       }
     }
 
-    if (!completed && deepResearch && !receivedAnyContent) {
-      onError?.("Deep Research stopped before the report finished. Please try again.");
+    if (!completed && !terminalStreamError) {
+      onError?.(
+        deepResearch && !receivedAnyContent
+          ? "Deep Research stopped before the report finished. Please try again."
+          : receivedAnyContent
+            ? "The reply was interrupted before it finished. You can ask me to continue."
+            : "The response ended before it finished. Please try again.",
+      );
+      await onDone();
       return;
     }
 

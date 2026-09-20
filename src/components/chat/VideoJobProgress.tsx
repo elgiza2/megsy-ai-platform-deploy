@@ -17,7 +17,11 @@ type VideoJob = {
 
 const STAGES: Array<{ id: string; label: string; statuses: string[] }> = [
   { id: "queued", label: "Queued", statuses: ["queued", "pending"] },
-  { id: "generating", label: "Generating video", statuses: ["running", "generating", "processing", "in_progress"] },
+  {
+    id: "generating",
+    label: "Generating video",
+    statuses: ["running", "generating", "processing", "in_progress"],
+  },
   { id: "encoding", label: "Encoding", statuses: ["encoding", "finalizing"] },
   { id: "done", label: "Ready", statuses: ["succeeded", "completed", "done", "ready"] },
 ];
@@ -32,7 +36,8 @@ function buildSteps(job: VideoJob | null): ProgressStep[] {
       return { id: s.id, label: s.label, state: "error", detail: job.error || undefined };
     if (idx < 0) return { id: s.id, label: s.label, state: i === 0 ? "active" : "pending" };
     if (i < idx) return { id: s.id, label: s.label, state: "done" };
-    if (i === idx) return { id: s.id, label: s.label, state: STAGES[idx].id === "done" ? "done" : "active" };
+    if (i === idx)
+      return { id: s.id, label: s.label, state: STAGES[idx].id === "done" ? "done" : "active" };
     return { id: s.id, label: s.label, state: "pending" };
   });
 }
@@ -88,7 +93,11 @@ export function VideoJobProgress({ jobId, className }: VideoJobProgressProps) {
   if (success) {
     if (!notifiedRef.current) {
       notifiedRef.current = true;
-      notifyJobComplete({ kind: "video", title: "🎬 Your video is ready", body: "Tap to view it in chat." });
+      notifyJobComplete({
+        kind: "video",
+        title: "🎬 Your video is ready",
+        body: "Tap to view it in chat.",
+      });
     }
     return null;
   }
@@ -96,7 +105,18 @@ export function VideoJobProgress({ jobId, className }: VideoJobProgressProps) {
   // On failure, keep the progress card visible with the last-known stage marked
   // as error + the provider error message, so users see WHY it failed instead
   // of the card silently disappearing.
-  return <ServiceProgress steps={buildSteps(job)} accent="primary" className={className} />;
+  const waiting = status === "queued" || status === "pending" || !job;
+  return (
+    <div className={className}>
+      {waiting ? (
+        <p className="mb-2 text-xs leading-relaxed text-muted-foreground">
+          Your video is in the generation queue. We’ll start it as soon as a provider slot is
+          available; you can leave this page open or come back later.
+        </p>
+      ) : null}
+      <ServiceProgress steps={buildSteps(job)} accent="primary" />
+    </div>
+  );
 }
 
 export default VideoJobProgress;

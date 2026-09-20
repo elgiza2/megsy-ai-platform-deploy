@@ -65,6 +65,18 @@ function assertHttpsUrl(raw: string): URL {
     throw new McpProtocolError("Invalid server URL");
   }
   const isLocal = url.hostname === "localhost" || url.hostname === "127.0.0.1";
+  const hostname = url.hostname.toLowerCase();
+  const privateHost =
+    hostname === "0.0.0.0" ||
+    hostname === "::" ||
+    hostname === "::1" ||
+    hostname.endsWith(".local") ||
+    /^10\./.test(hostname) ||
+    /^192\.168\./.test(hostname) ||
+    /^(172\.(1[6-9]|2\d|3[0-1]))\./.test(hostname) ||
+    hostname.startsWith("169.254.");
+  if (privateHost && !isLocal)
+    throw new McpProtocolError("Private network endpoints are not allowed");
   if (url.protocol !== "https:" && !isLocal) {
     throw new McpProtocolError("Only https endpoints are allowed");
   }
@@ -156,7 +168,9 @@ export class McpClient {
       });
     } catch (err) {
       throw new McpProtocolError(
-        (err as Error)?.name === "AbortError" ? "Server timed out" : `Request failed: ${(err as Error).message}`,
+        (err as Error)?.name === "AbortError"
+          ? "Server timed out"
+          : `Request failed: ${(err as Error).message}`,
       );
     } finally {
       clearTimeout(timer);
@@ -203,7 +217,10 @@ export class McpClient {
   /** Handshake, negotiating down the protocol version when needed. */
   async initialize(): Promise<void> {
     if (this.initialized) return;
-    const versions = [this.protocolVersion, ...FALLBACK_PROTOCOL_VERSIONS.filter((v) => v !== this.protocolVersion)];
+    const versions = [
+      this.protocolVersion,
+      ...FALLBACK_PROTOCOL_VERSIONS.filter((v) => v !== this.protocolVersion),
+    ];
     let lastError: unknown = null;
 
     for (const version of versions) {
@@ -326,8 +343,12 @@ export async function discoverAuthServer(
           issuer: String(doc.issuer ?? base),
           authorization_endpoint: String(doc.authorization_endpoint),
           token_endpoint: String(doc.token_endpoint),
-          registration_endpoint: doc.registration_endpoint ? String(doc.registration_endpoint) : undefined,
-          scopes_supported: Array.isArray(doc.scopes_supported) ? doc.scopes_supported.map(String) : undefined,
+          registration_endpoint: doc.registration_endpoint
+            ? String(doc.registration_endpoint)
+            : undefined,
+          scopes_supported: Array.isArray(doc.scopes_supported)
+            ? doc.scopes_supported.map(String)
+            : undefined,
           code_challenge_methods_supported: Array.isArray(doc.code_challenge_methods_supported)
             ? doc.code_challenge_methods_supported.map(String)
             : undefined,
@@ -360,7 +381,10 @@ export async function registerOAuthClient(
     if (!res.ok) return null;
     const doc = await res.json();
     if (!doc?.client_id) return null;
-    return { client_id: String(doc.client_id), client_secret: doc.client_secret ? String(doc.client_secret) : undefined };
+    return {
+      client_id: String(doc.client_id),
+      client_secret: doc.client_secret ? String(doc.client_secret) : undefined,
+    };
   } catch {
     return null;
   }
@@ -415,7 +439,11 @@ export type TokenSet = {
   token_type?: string;
 };
 
-async function tokenRequest(endpoint: string, body: URLSearchParams, clientSecret?: string): Promise<TokenSet> {
+async function tokenRequest(
+  endpoint: string,
+  body: URLSearchParams,
+  clientSecret?: string,
+): Promise<TokenSet> {
   const headers: Record<string, string> = {
     "Content-Type": "application/x-www-form-urlencoded",
     Accept: "application/json",
@@ -426,7 +454,9 @@ async function tokenRequest(endpoint: string, body: URLSearchParams, clientSecre
   const res = await fetch(endpoint, { method: "POST", headers, body, redirect: "error" });
   const doc = await res.json().catch(() => null);
   if (!res.ok || !doc?.access_token) {
-    throw new McpProtocolError(doc?.error_description || doc?.error || `Sign-in failed (${res.status})`);
+    throw new McpProtocolError(
+      doc?.error_description || doc?.error || `Sign-in failed (${res.status})`,
+    );
   }
   return {
     access_token: String(doc.access_token),

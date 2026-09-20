@@ -22,9 +22,8 @@
 [data-shell="megsy"] .user-bubble {
   background: var(--chat-user-bubble-bg) !important;
   color: var(--chat-user-bubble-fg) !important;
-  border: 1px solid
-    color-mix(in srgb, var(--chat-user-bubble-fg) 12%, transparent) !important;
-  box-shadow: 0 6px 18px -12px rgb(0 0 0 / 0.55) !important;
+  border: 1px solid color-mix(in srgb, var(--chat-user-bubble-fg) 12%, transparent) !important;
+  box-shadow: none !important;
   font-weight: 450;
 }
 
@@ -85,6 +84,41 @@
   color: hsl(var(--foreground)) !important;
   font-weight: 700;
   letter-spacing: -0.01em;
+}
+
+/* Chat content surfaces are intentionally flat: comparison tables, markdown
+   blocks, previews, and structured cards should disappear into the chat
+   canvas instead of looking like stacked floating panels. Keep this scoped to
+   the chat main area so settings, dialogs, and marketing cards are unchanged. */
+[data-chat-main="true"] .prose-chat table,
+[data-chat-main="true"] .prose-chat thead,
+[data-chat-main="true"] .prose-chat tbody,
+[data-chat-main="true"] .prose-chat tr,
+[data-chat-main="true"] .prose-chat th,
+[data-chat-main="true"] .prose-chat td,
+[data-chat-main="true"] .prose-chat blockquote,
+[data-chat-main="true"] .prose-chat pre,
+[data-chat-main="true"] .prose-chat code,
+[data-chat-main="true"] .bg-card,
+[data-chat-main="true"] .bg-card\/30,
+[data-chat-main="true"] .bg-card\/60,
+[data-chat-main="true"] .bg-background\/30,
+[data-chat-main="true"] .bg-background\/40,
+[data-chat-main="true"] .bg-background\/60 {
+  background: hsl(var(--background)) !important;
+  background-color: hsl(var(--background)) !important;
+  box-shadow: none !important;
+}
+
+[data-chat-main="true"] .prose-chat table,
+[data-chat-main="true"] .prose-chat blockquote,
+[data-chat-main="true"] .prose-chat pre,
+[data-chat-main="true"] .prose-chat code {
+  background-image: none !important;
+}
+
+[data-chat-main="true"] [class*="shadow-"] {
+  box-shadow: none !important;
 }
 
 /* Chat header must be visually indistinguishable from the chat canvas. */
@@ -163,10 +197,20 @@
     pointer-events: none;
     opacity: 0;
     background:
-      radial-gradient(ellipse at 50% 100%, color-mix(in srgb, var(--megsy-blue) 34%, transparent), transparent 66%),
-      linear-gradient(to top, color-mix(in srgb, var(--megsy-blue) 15%, transparent), transparent 72%);
+      radial-gradient(
+        ellipse at 50% 100%,
+        color-mix(in srgb, var(--megsy-blue) 34%, transparent),
+        transparent 66%
+      ),
+      linear-gradient(
+        to top,
+        color-mix(in srgb, var(--megsy-blue) 15%, transparent),
+        transparent 72%
+      );
     transform: translate3d(0, 12%, 0) scale(0.96);
-    transition: opacity 420ms ease, transform 650ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition:
+      opacity 420ms ease,
+      transform 650ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   [data-chat-main="true"][data-chat-glow="true"]::after {
@@ -174,7 +218,6 @@
     transform: translate3d(0, 0, 0) scale(1);
     animation: chat-work-glow 5s ease-in-out infinite alternate;
   }
-
 
   .chat-composer-frame[data-compact="true"] {
     min-height: 54px;
@@ -217,10 +260,18 @@
 }
 
 @keyframes chat-work-glow {
-  from { transform: translate3d(-2%, 2%, 0) scale(0.98); opacity: 0.72; }
-  to { transform: translate3d(2%, -2%, 0) scale(1.04); opacity: 1; }
+  from {
+    transform: translate3d(-2%, 2%, 0) scale(0.98);
+    opacity: 0.72;
+  }
+  to {
+    transform: translate3d(2%, -2%, 0) scale(1.04);
+    opacity: 1;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-chat-main="true"][data-chat-glow="true"]::after { animation: none; }
+  [data-chat-main="true"][data-chat-glow="true"]::after {
+    animation: none;
+  }
 }

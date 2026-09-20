@@ -14,7 +14,6 @@ import {
   ChevronRight,
   Blocks,
   Wand2,
-
 } from "lucide-react";
 import { m as motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,7 +33,6 @@ import { useConfirm } from "@/components/common/ConfirmDialog";
 import { cn } from "@/lib/utils";
 import { SkillsAddMenu } from "./components/SkillsExtras";
 import { resolveSkillIcon, skillEmoji } from "@/lib/skillIcon";
-
 
 import { sanitizeErrorMessage } from "@/lib/sanitizeError";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/edgeRuntime";
@@ -68,7 +66,8 @@ const SUGGESTIONS = [
 export default function SkillsSettingsPage() {
   const navigate = useNavigate();
   const confirmDialog = useConfirm();
-  const isArabicUi = typeof document !== "undefined" && document.documentElement.lang.startsWith("ar");
+  const isArabicUi =
+    typeof document !== "undefined" && document.documentElement.lang.startsWith("ar");
 
   const location = useLocation();
   const { mySkills, librarySkills, loading, reload, toggleEnabled } = useSkills();
@@ -299,10 +298,7 @@ export default function SkillsSettingsPage() {
   const q = query.trim().toLowerCase();
   const filtered = mySkills.filter((s) => {
     if (!q) return true;
-    return (
-      s.name.toLowerCase().includes(q) ||
-      (s.description || "").toLowerCase().includes(q)
-    );
+    return s.name.toLowerCase().includes(q) || (s.description || "").toLowerCase().includes(q);
   });
   const visible = tab === "enabled" ? filtered.filter((s) => s.is_enabled !== false) : filtered;
   const enabledCount = mySkills.filter((s) => s.is_enabled !== false).length;
@@ -338,7 +334,10 @@ export default function SkillsSettingsPage() {
 
       {/* Search */}
       <div className="flex items-center gap-2.5 h-12 px-4 rounded-full bg-[color:var(--mn-sep)]/60 focus-within:bg-[var(--mn-card)] transition-colors">
-        <Search className="w-[17px] h-[17px] text-[color:var(--mn-muted)] shrink-0" strokeWidth={1.9} />
+        <Search
+          className="w-[17px] h-[17px] text-[color:var(--mn-muted)] shrink-0"
+          strokeWidth={1.9}
+        />
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -395,11 +394,17 @@ export default function SkillsSettingsPage() {
           <span className="w-9 h-9 rounded-[12px] grid place-items-center bg-[color:var(--mn-sep)]">
             <Blocks className="w-[18px] h-[18px] text-[color:var(--mn-fg)]" strokeWidth={1.8} />
           </span>
-          <span className="mt-2.5 block text-[13.5px] font-semibold text-[color:var(--mn-fg)]">{isArabicUi ? "المكتبة" : "Library"}</span>
+          <span className="mt-2.5 block text-[13.5px] font-semibold text-[color:var(--mn-fg)]">
+            {isArabicUi ? "المكتبة" : "Library"}
+          </span>
           <span className="block text-[11.5px] text-[color:var(--mn-muted)]">
             {librarySkills.length > 0
-              ? isArabicUi ? `${librarySkills.length} جاهزة` : `${librarySkills.length} ready-made`
-              : isArabicUi ? "المهارات الرسمية" : "Official skills"}
+              ? isArabicUi
+                ? `${librarySkills.length} جاهزة`
+                : `${librarySkills.length} ready-made`
+              : isArabicUi
+                ? "المهارات الرسمية"
+                : "Official skills"}
           </span>
         </button>
 
@@ -411,23 +416,28 @@ export default function SkillsSettingsPage() {
             {importing ? (
               <Loader2 className="w-[18px] h-[18px] animate-spin text-[color:var(--mn-fg)]" />
             ) : (
-              <Paperclip className="w-[18px] h-[18px] text-[color:var(--mn-fg)]" strokeWidth={1.8} />
+              <Paperclip
+                className="w-[18px] h-[18px] text-[color:var(--mn-fg)]"
+                strokeWidth={1.8}
+              />
             )}
           </span>
-          <span className="mt-2.5 block text-[13.5px] font-semibold text-[color:var(--mn-fg)]">{isArabicUi ? "استيراد" : "Import"}</span>
-          <span className="block text-[11.5px] text-[color:var(--mn-muted)]">{isArabicUi ? "من ملف .zip" : "From a .zip file"}</span>
+          <span className="mt-2.5 block text-[13.5px] font-semibold text-[color:var(--mn-fg)]">
+            {isArabicUi ? "استيراد" : "Import"}
+          </span>
+          <span className="block text-[11.5px] text-[color:var(--mn-muted)]">
+            {isArabicUi ? "من ملف .zip" : "From a .zip file"}
+          </span>
         </button>
       </div>
 
       {/* Filters */}
       <div className="flex items-center justify-between gap-2">
         <div className="-mx-1 flex items-center gap-1.5 overflow-x-auto px-1 pb-0.5 no-scrollbar">
-          {(
-            [
-              { id: "all" as const, label: isArabicUi ? "الكل" : "All", count: mySkills.length },
-              { id: "enabled" as const, label: isArabicUi ? "شغال" : "Active", count: enabledCount },
-            ]
-          ).map((t) => (
+          {[
+            { id: "all" as const, label: isArabicUi ? "الكل" : "All", count: mySkills.length },
+            { id: "enabled" as const, label: isArabicUi ? "شغال" : "Active", count: enabledCount },
+          ].map((t) => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
@@ -459,14 +469,25 @@ export default function SkillsSettingsPage() {
           </div>
           <p className="text-[15px] font-semibold text-[color:var(--mn-fg)]">
             {tab === "enabled"
-              ? isArabicUi ? "مفيش مهارات شغالة" : "No active skills"
-              : query ? (isArabicUi ? "مفيش نتائج" : "No matches")
-              : isArabicUi ? "لسه مفيش مهارات" : "No skills yet"}
+              ? isArabicUi
+                ? "مفيش مهارات شغالة"
+                : "No active skills"
+              : query
+                ? isArabicUi
+                  ? "مفيش نتائج"
+                  : "No matches"
+                : isArabicUi
+                  ? "لسه مفيش مهارات"
+                  : "No skills yet"}
           </p>
           <p className="text-[12.5px] mt-1.5 text-[color:var(--mn-muted)] max-w-[280px] mx-auto leading-relaxed">
             {tab === "enabled"
-              ? isArabicUi ? "شغّل واحدة من تحت أو اعمل مهارة جديدة." : "Turn one on below, or create a new one."
-              : isArabicUi ? "اعمل أول خبير ليك أو ضيف مهارة من المكتبة الرسمية." : "Create your first expert, or add one from the official library."}
+              ? isArabicUi
+                ? "شغّل واحدة من تحت أو اعمل مهارة جديدة."
+                : "Turn one on below, or create a new one."
+              : isArabicUi
+                ? "اعمل أول خبير ليك أو ضيف مهارة من المكتبة الرسمية."
+                : "Create your first expert, or add one from the official library."}
           </p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
             <button
@@ -523,8 +544,6 @@ export default function SkillsSettingsPage() {
   );
 }
 
-
-
 const SKILL_HUES = [212, 268, 152, 24, 340, 190, 45, 120];
 
 function skillHue(name: string) {
@@ -566,7 +585,6 @@ function SkillAvatar({
     </div>
   );
 }
-
 
 function SkillRowCard({
   skill,
@@ -625,9 +643,6 @@ function SkillRowCard({
     </motion.div>
   );
 }
-
-
-
 
 // ===========================================================================
 // Conversational Skill Designer
@@ -730,13 +745,22 @@ function SkillDesigner({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          apikey: SUPABASE_ANON_KEY,
           Authorization: `Bearer ${session?.access_token || SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify({
           messages: next.map((m) => ({ role: m.role, content: m.content })),
         }),
       });
-      const data = await resp.json();
+      const contentType = resp.headers.get("content-type") || "";
+      const data = contentType.includes("application/json")
+        ? await resp.json()
+        : { error: await resp.text() };
+      if (!resp.ok) {
+        const detail = String(data?.message || data?.error || `Request failed (${resp.status})`);
+        throw new Error(detail.slice(0, 240));
+      }
+      if (data?.error) throw new Error(String(data.error));
       if (data.action === "draft" && data.skill) {
         const s = data.skill;
         setDraft({
@@ -767,8 +791,13 @@ function SkillDesigner({
           { role: "assistant", content: data.message || "Could you tell me a bit more?" },
         ]);
       }
-    } catch {
-      setMessages([...next, { role: "assistant", content: "Sorry — I hit an error. Try again?" }]);
+    } catch (error) {
+      console.error("[skill-designer] request failed", error);
+      const detail = error instanceof Error ? error.message : "The skill service is unavailable";
+      setMessages([
+        ...next,
+        { role: "assistant", content: `I couldn't create the skill: ${detail}. Please try again.` },
+      ]);
     } finally {
       setThinking(false);
     }
@@ -838,17 +867,17 @@ function SkillDesigner({
       }
     >
       {/* Designer chat */}
-      <SubSection
-        title="Designer"
-        description="Describe or refine the skill in plain language."
-      >
+      <SubSection title="Designer" description="Describe or refine the skill in plain language.">
         <SubCard flush>
           <div
             ref={scrollRef}
             className="min-h-[200px] max-h-[46vh] overflow-y-auto px-4 py-4 space-y-4"
           >
             {messages.map((m, i) => (
-              <div key={i} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
+              <div
+                key={i}
+                className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}
+              >
                 {m.role === "user" ? (
                   <div className="max-w-[85%] rounded-[16px] rounded-br-[6px] px-3.5 py-2.5 bg-primary text-primary-foreground text-[13.5px] whitespace-pre-wrap leading-relaxed">
                     {m.content}
@@ -930,7 +959,7 @@ function SkillDesigner({
                 }}
                 rows={1}
                 placeholder={
-                  hasDraft ? "Refine it — \"make the tone bolder\"…" : "Describe the expert you want…"
+                  hasDraft ? 'Refine it — "make the tone bolder"…' : "Describe the expert you want…"
                 }
                 className="w-full resize-none bg-transparent outline-none text-[13.5px] leading-relaxed pl-11 pr-12 pt-3 pb-3 max-h-32 text-[color:var(--mn-fg)] placeholder:text-[color:var(--mn-muted)]"
               />
@@ -951,7 +980,11 @@ function SkillDesigner({
                 aria-label="Import .zip"
                 className="absolute left-2 bottom-2 h-8 w-8 rounded-full flex items-center justify-center text-[color:var(--mn-muted)] hover:text-[color:var(--mn-fg)] transition-colors disabled:opacity-50"
               >
-                {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Paperclip className="w-4 h-4" />}
+                {importing ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Paperclip className="w-4 h-4" />
+                )}
               </button>
               <button
                 onClick={send}
@@ -1038,7 +1071,10 @@ function SkillDesigner({
             </SubCard>
           </SubSection>
 
-          <SubSection title="Instructions" description="The system prompt Megsy follows for this skill.">
+          <SubSection
+            title="Instructions"
+            description="The system prompt Megsy follows for this skill."
+          >
             <SubCard flush>
               <Textarea
                 rows={12}
@@ -1071,7 +1107,10 @@ function SkillDesigner({
             </div>
           </SubSection>
 
-          <SubSection title="Model" description="Leave on Auto unless this skill needs a specific model.">
+          <SubSection
+            title="Model"
+            description="Leave on Auto unless this skill needs a specific model."
+          >
             <SubCard flush>
               <select
                 value={draft.preferred_model || "auto"}

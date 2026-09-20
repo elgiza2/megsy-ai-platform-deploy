@@ -22,9 +22,12 @@ const RATE_LIMITS: Record<string, { limit: number; windowMs: number }> = {
   "deep-research": { limit: 6, windowMs: 60 * 60 * 1000 },
   "web-search": { limit: 120, windowMs: 5 * 60 * 1000 },
   "read-url": { limit: 60, windowMs: 5 * 60 * 1000 },
-  "computer-agent": { limit: 30, windowMs: 5 * 60 * 1000 },
-  "long-run": { limit: 30, windowMs: 5 * 60 * 1000 },
-  "dev-agent": { limit: 60, windowMs: 5 * 60 * 1000 },
+  // Agent calls are expensive and can hold external sessions open. These are
+  // admission limits, not plan entitlements; the backend still enforces auth
+  // and per-user ownership for every run.
+  "computer-agent": { limit: 10, windowMs: 15 * 60 * 1000 },
+  "long-run": { limit: 5, windowMs: 15 * 60 * 1000 },
+  "dev-agent": { limit: 20, windowMs: 15 * 60 * 1000 },
   mcp: { limit: 240, windowMs: 5 * 60 * 1000 },
   transcribe: { limit: 60, windowMs: 5 * 60 * 1000 },
   "render-pdf": { limit: 30, windowMs: 5 * 60 * 1000 },

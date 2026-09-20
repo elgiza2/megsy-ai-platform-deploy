@@ -17,9 +17,6 @@ import { invokeFunction } from "@/lib/supabaseFunction";
 import SEOHead from "@/components/common/SEOHead";
 import { Helmet } from "react-helmet-async";
 import { usePrefetchOnIdle } from "@/hooks/usePrefetchOnIdle";
-import { useIsMobile } from "@/hooks/use-mobile";
-import MobilePricingScreen from "@/components/mobile-showcase/MobilePricingScreen";
-import MobilePushShell from "@/components/layout/MobilePushShell";
 import AppSidebar from "@/components/layout/AppSidebar";
 import { useSidebarCollapsed } from "@/hooks/useSidebarCollapsed";
 import type { Gateway } from "@/components/billing/PaymentGatewaySheet";
@@ -68,7 +65,6 @@ const PricingPage = () => {
 
   const [isYearly, setIsYearly] = useState(false);
   const [loadingTier, setLoadingTier] = useState<PlanTier | null>(null);
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [gatewaySheet, setGatewaySheet] = useState<{
     tier: PlanTier;
     interval: "monthly" | "yearly";
@@ -136,7 +132,8 @@ const PricingPage = () => {
         perYear: "/ year",
         popular: "Most popular",
         trial: `Try ${TRIAL_DAYS} days for $${TRIAL_PRICE}`,
-        checkoutNote: "The final local-currency amount is shown by the payment provider before you confirm.",
+        checkoutNote:
+          "The final local-currency amount is shown by the payment provider before you confirm.",
         faq: "Questions",
         subscribed: "You are already subscribed",
         upgrade: "Upgrade plan",
@@ -292,9 +289,6 @@ const PricingPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const isMobile = useIsMobile();
-  const proPlan = PLANS.find((p) => p.tier === "pro");
-
   const gatewaySheetNode = (
     <Suspense fallback={null}>
       {gatewaySheet && (
@@ -308,42 +302,6 @@ const PricingPage = () => {
       )}
     </Suspense>
   );
-
-  // ─── Mobile keeps its dedicated showcase screen ──
-  if (isMobile && proPlan) {
-    return (
-      <>
-        <SEOHead
-          title={`Pricing — ${BRAND} AI Plans & Credits`}
-          description={`Simple plans for ${BRAND} AI. Chat, images, video, slides and full-stack builds — one subscription.`}
-          path="/pricing"
-        />
-        <Helmet>
-          <script type="application/ld+json">{JSON.stringify(pricingLd)}</script>
-        </Helmet>
-        <MobilePushShell
-          open={mobileOpen}
-          onOpenChange={setMobileOpen}
-          onNewChat={() => navigate("/")}
-          currentMode="chat"
-        >
-          <MobilePricingScreen
-            isYearly={isYearly}
-            onToggleYearly={setIsYearly}
-            loadingTier={loadingTier}
-            onSubscribe={(tier, opts) =>
-              handleSubscribe(tier, {
-                interval: isYearly ? "yearly" : "monthly",
-                trial: opts?.trial === true,
-              })
-            }
-            onMenuClick={() => setMobileOpen(true)}
-          />
-        </MobilePushShell>
-        {gatewaySheetNode}
-      </>
-    );
-  }
 
   return (
     <>
@@ -415,8 +373,11 @@ const PricingPage = () => {
             ) : null}
 
             {/* Plans */}
-            <section id="plans-grid" className="mx-auto mt-10 grid w-full max-w-md gap-5">
-              {PLANS.filter((p) => p.tier === "pro").map((plan) => {
+            <section
+              id="plans-grid"
+              className="mx-auto mt-10 grid w-full max-w-5xl gap-5 md:grid-cols-2"
+            >
+              {PLANS.map((plan) => {
                 const fallbackPrice = getDisplayPrice(plan, isYearly);
                 const catalogEntry = priceFor(
                   catalog,

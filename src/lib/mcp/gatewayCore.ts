@@ -57,7 +57,10 @@ export interface GatewayPayload {
 
 type Result = { status: number; body: Record<string, unknown> };
 
-const ok = (body: Record<string, unknown> = {}): Result => ({ status: 200, body: { ok: true, ...body } });
+const ok = (body: Record<string, unknown> = {}): Result => ({
+  status: 200,
+  body: { ok: true, ...body },
+});
 const fail = (status: number, error: string): Result => ({ status, body: { ok: false, error } });
 
 /** Server client. Prefers the service key; falls back to the anon key scoped to
@@ -77,7 +80,16 @@ function db(userToken?: string): SupabaseClient {
 }
 
 function redirectUri(origin?: string): string {
-  const base = (origin || process.env.PUBLIC_SITE_URL || "https://megsyai.com").replace(/\/$/, "");
+  const configured = (process.env.PUBLIC_SITE_URL || "https://megsyai.com").replace(/\/$/, "");
+  const requested = (origin || configured).replace(/\/$/, "");
+  const allowed = [
+    configured,
+    ...(process.env.MCP_ALLOWED_ORIGINS || "")
+      .split(",")
+      .map((v) => v.trim())
+      .filter(Boolean),
+  ];
+  const base = allowed.includes(requested) ? requested : configured;
   return `${base}/mcp-callback`;
 }
 
@@ -108,7 +120,8 @@ function sanitize(row: any) {
   return {
     ...rest,
     needs_auth: row?.state === "needs_auth",
-    has_credentials: Boolean(oauth?.tokens?.access_token) || Object.keys(auth_headers ?? {}).length > 0,
+    has_credentials:
+      Boolean(oauth?.tokens?.access_token) || Object.keys(auth_headers ?? {}).length > 0,
   };
 }
 
@@ -118,7 +131,11 @@ async function requireUser(supabase: SupabaseClient, token?: string) {
   return error || !data.user ? null : data.user;
 }
 
-async function loadRow(supabase: SupabaseClient, userId: string, id?: string): Promise<ConnectionRow | null> {
+async function loadRow(
+  supabase: SupabaseClient,
+  userId: string,
+  id?: string,
+): Promise<ConnectionRow | null> {
   if (!id) return null;
   const { data } = await supabase
     .from("mcp_connections")
@@ -130,7 +147,10 @@ async function loadRow(supabase: SupabaseClient, userId: string, id?: string): P
 }
 
 /** Fresh access token for a row, refreshing when it is close to expiry. */
-async function accessTokenFor(supabase: SupabaseClient, row: ConnectionRow): Promise<string | null> {
+async function accessTokenFor(
+  supabase: SupabaseClient,
+  row: ConnectionRow,
+): Promise<string | null> {
   const oauth = row.oauth ?? {};
   const tokens: TokenSet | undefined = oauth.tokens;
   if (!tokens?.access_token) return null;
@@ -146,7 +166,11 @@ async function accessTokenFor(supabase: SupabaseClient, row: ConnectionRow): Pro
       refreshToken: tokens.refresh_token,
       resource: row.url,
     });
-    const merged = { ...tokens, ...next, refresh_token: next.refresh_token ?? tokens.refresh_token };
+    const merged = {
+      ...tokens,
+      ...next,
+      refresh_token: next.refresh_token ?? tokens.refresh_token,
+    };
     await supabase
       .from("mcp_connections")
       .update({ oauth: { ...oauth, tokens: merged } })
@@ -167,7 +191,11 @@ async function clientFor(supabase: SupabaseClient, row: ConnectionRow): Promise<
 }
 
 /** Handshake + tools/list, persisting the result (or the auth requirement). */
-async function probeRow(supabase: SupabaseClient, row: ConnectionRow, origin?: string): Promise<Result> {
+async function probeRow(
+  supabase: SupabaseClient,
+  row: ConnectionRow,
+  origin?: string,
+): Promise<Result> {
   try {
     const client = await clientFor(supabase, row);
     const tools = await client.listTools();
@@ -263,7 +291,10 @@ async function startAuthorization(
   });
 }
 
-function textOf(result: { content?: { type: string; text?: string }[]; structuredContent?: unknown }): string {
+function textOf(result: {
+  content?: { type: string; text?: string }[];
+  structuredContent?: unknown;
+}): string {
   const text = (result.content ?? [])
     .filter((c) => c.type === "text" && c.text)
     .map((c) => c.text!)
@@ -282,7 +313,6 @@ export async function handleMcpGateway(payload: GatewayPayload | null): Promise<
   } catch {
     return fail(401, "Not signed in");
   }
-
 
   const user = await requireUser(supabase, payload.token);
   if (!user) return fail(401, "Not signed in");
@@ -306,11 +336,32 @@ export async function handleMcpGateway(payload: GatewayPayload | null): Promise<
     case "add": {
       const url = String(payload.url ?? "").trim();
       if (!url) return fail(400, "Server URL is required");
+      let parsedUrl: URL;
+      try {
+        parsedUrl = new URL(url);
+      } catch {
+        return fail(400, "Invalid server URL");
+      }
+      const host = parsedUrl.hostname.toLowerCase();
+      const privateHost =
+        host === "0.0.0.0" ||
+        host === "::" ||
+        host === "::1" ||
+        host.endsWith(".local") ||
+        host === "localhost" ||
+        host === "127.0.0.1" ||
+        /^(10|127)\./.test(host) ||
+        /^192\.168\./.test(host) ||
+        /^(172\.(1[6-9]|2\d|3[0-1]))\./.test(host) ||
+        host.startsWith("169.254.");
+      if (parsedUrl.protocol !== "https:" || privateHost) {
+        return fail(400, "MCP servers must use a public HTTPS URL");
+      }
       const { data, error } = await supabase
         .from("mcp_connections")
         .insert({
           user_id: userId,
-          name: String(payload.name ?? "").trim() || new URL(url).hostname,
+          name: String(payload.name ?? "").trim() || parsedUrl.hostname,
           url,
           transport: "streamable-http",
           state: "pending",
@@ -334,7 +385,8 @@ export async function handleMcpGateway(payload: GatewayPayload | null): Promise<
       if (payload.enabled !== undefined) patch.enabled = Boolean(payload.enabled);
       if (payload.headers !== undefined) {
         patch.auth_headers = payload.headers;
-        if (Object.keys(payload.headers).length && row.auth_mode !== "oauth") patch.auth_mode = "headers";
+        if (Object.keys(payload.headers).length && row.auth_mode !== "oauth")
+          patch.auth_mode = "headers";
       }
       const { error } = await supabase.from("mcp_connections").update(patch).eq("id", row.id);
       if (error) return fail(400, error.message);
@@ -392,7 +444,11 @@ export async function handleMcpGateway(payload: GatewayPayload | null): Promise<
         });
         await supabase
           .from("mcp_connections")
-          .update({ oauth: { ...(row.oauth ?? {}), ...meta, tokens }, auth_mode: "oauth", state: "pending" })
+          .update({
+            oauth: { ...(row.oauth ?? {}), ...meta, tokens },
+            auth_mode: "oauth",
+            state: "pending",
+          })
           .eq("id", row.id);
         const refreshed = await loadRow(supabase, userId, row.id);
         const probe = await probeRow(supabase, refreshed!, payload.origin);
@@ -510,7 +566,10 @@ export async function handleMcpGateway(payload: GatewayPayload | null): Promise<
         });
         if (err instanceof McpAuthRequiredError) {
           await supabase.from("mcp_connections").update({ state: "needs_auth" }).eq("id", row.id);
-          return { status: 200, body: { ok: false, needs_auth: true, error: "Sign in to this server again" } };
+          return {
+            status: 200,
+            body: { ok: false, needs_auth: true, error: "Sign in to this server again" },
+          };
         }
         return fail(400, message);
       }

@@ -38,16 +38,12 @@ export const LegacyAiRedirect = () => {
   return <Navigate to={`/l${rest}`} replace />;
 };
 
-
 /**
  * No loading screen, ever. The next screen is prefetched from the current one
  * (`@/lib/nextHop`) and `DeferredRoutes` keeps the previous page painted while a
  * chunk resolves, so a visible fallback would only ever be a flash of nothing.
  */
 export const LazyFallback = () => null;
-
-
-
 
 // Route rendering with a deferred location. While the next route's lazy chunk
 // (or data) is still loading, React keeps the PREVIOUS page painted instead of
@@ -66,7 +62,6 @@ export const DeferredRoutes = ({ children }: { children: React.ReactNode }) => {
     prefetchNextHop(location.pathname);
   }, [location.pathname]);
 
-
   useEffect(() => {
     const root = document.documentElement;
     if (isPending) root.setAttribute("data-nav-pending", "true");
@@ -81,7 +76,6 @@ export const DeferredRoutes = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-
 export const PromoBannerGate = () => {
   const { hidden } = usePromoBanner();
   const location = useLocation();
@@ -95,7 +89,6 @@ export const PromoBannerGate = () => {
   return <UnlimitedPromoBanner chatSurfaceOffset={chatSurfaceOffset} />;
 };
 
-
 // Preload the most-likely next routes AND the heavy shared chunks (icons,
 // framer-motion, lucide-react) during idle time so navigation from the
 // landing page feels instant. Since we made those shared chunks lazy to
@@ -106,9 +99,11 @@ export const preloadCommonRoutes = () => {
     typeof window !== "undefined" &&
     window.matchMedia?.("(hover: none) and (pointer: coarse)").matches;
 
-  const connection = (navigator as unknown as {
-    connection?: { saveData?: boolean; effectiveType?: string };
-  }).connection;
+  const connection = (
+    navigator as unknown as {
+      connection?: { saveData?: boolean; effectiveType?: string };
+    }
+  ).connection;
   const slowConnection =
     connection?.saveData === true || /(^|-)2g$|slow-2g/i.test(connection?.effectiveType || "");
   if (slowConnection) return;
@@ -135,9 +130,12 @@ export const preloadCommonRoutes = () => {
     tasks.forEach((t, i) => {
       // Shared chunks fire immediately (i=0,1). Route chunks staggered by
       // 250ms so they don't compete with each other on slow connections.
-      window.setTimeout(() => {
-        t().catch(() => {});
-      }, i * (isMobile ? 900 : 500));
+      window.setTimeout(
+        () => {
+          t().catch(() => {});
+        },
+        i * (isMobile ? 900 : 500),
+      );
     });
   };
   const ric = (
@@ -271,8 +269,21 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   const location = useLocation();
 
-  if (!state.resolved) return null;
-  if (!state.authenticated) return <Navigate to={pathForZone("/auth", location.pathname)} replace />;
+  if (!state.resolved) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center bg-background px-6">
+        <div className="w-full max-w-sm space-y-3" aria-label="Loading your session" role="status">
+          <div className="h-5 w-32 animate-pulse rounded bg-muted" />
+          <div className="h-3 w-full animate-pulse rounded bg-muted/70" />
+          <div className="h-3 w-4/5 animate-pulse rounded bg-muted/70" />
+        </div>
+      </div>
+    );
+  }
+  if (!state.authenticated) {
+    const returnTo = `${location.pathname}${location.search}${location.hash}`;
+    const authPath = pathForZone("/auth", location.pathname);
+    return <Navigate to={`${authPath}?redirect=${encodeURIComponent(returnTo)}`} replace />;
+  }
   return <>{children}</>;
 };
-

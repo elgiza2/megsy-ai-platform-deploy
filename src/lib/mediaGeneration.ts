@@ -12,7 +12,6 @@ import { getRunwayVideoPolicy } from "@/lib/runwayModelPolicy";
 // created here; the legacy `media-image` deployment ignores model_slug).
 const IMAGE_FN = "anything-api";
 
-
 // Video job pacing depends on the provider. Alibaba Wan runs ~5–6 min end
 // to end, so we show a visible countdown before polling. deAPI usually
 // finishes within seconds, so we skip the wait and poll aggressively.
@@ -20,7 +19,6 @@ const ALIBABA_POLL_INTERVAL_MS = 5_000;
 const ALIBABA_POLL_MAX_MS = 15 * 60_000;
 const DEAPI_POLL_INTERVAL_MS = 3_000;
 const DEAPI_POLL_MAX_MS = 5 * 60_000;
-
 
 interface ScenePartialCb {
   (index: number, previewDataUrl: string, progress: number): void;
@@ -69,7 +67,9 @@ async function requestImage(
       model_slug: modelSlug,
       num_images: 1,
       aspect_ratio: aspectRatio,
-      ...( /^(?:runway[-_])?(gpt_image_2_5_flare|gpt_image_2_5_sunburst|seedream5_pro|gpt_image_2|grok_imagine_image_2|muse_image|gemini_image3\.1_flash|gen4_image_turbo)$/i.test(modelSlug)
+      ...(/^(?:runway[-_])?(gpt_image_2_5_flare|gpt_image_2_5_sunburst|seedream5_pro|gpt_image_2|grok_imagine_image_2|muse_image|gemini_image3\.1_flash|gen4_image_turbo)$/i.test(
+        modelSlug,
+      )
         ? { resolution: "1K" }
         : {}),
       ...(refs.length > 0
@@ -128,7 +128,6 @@ async function generateImageScene(
   }
 }
 
-
 /**
  * Reserves one video from the caller's monthly allowance. Enforced in the
  * database (`consume_video_quota`), so the UI cannot bypass it.
@@ -138,9 +137,17 @@ async function reserveVideoQuota(
 ): Promise<{ allowed: boolean; message: string }> {
   try {
     const unlimited = isUnlimitedMediaModel({ slug: modelSlug });
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+    if (authError || !authData.user) {
+      return { allowed: false, message: "Sign in to generate videos." };
+    }
     const { data, error } = await supabase.rpc("consume_video_quota", {
       _model: modelSlug,
       _unlimited: unlimited,
+      // Passing the third argument selects the user-aware overload explicitly.
+      // The database currently contains a legacy two-argument overload too,
+      // and omitting this field makes PostgREST report an ambiguous function.
+      _user_id: authData.user.id,
     });
     if (error) {
       // Never hard-block on transient RPC failures for unlimited models.
@@ -155,7 +162,10 @@ async function reserveVideoQuota(
         message: `You've used all ${res.limit ?? 0} videos in your monthly plan. Upgrade to keep generating.`,
       };
     }
-    return { allowed: false, message: res.error || "Video generation is not available on your plan." };
+    return {
+      allowed: false,
+      message: res.error || "Video generation is not available on your plan.",
+    };
   } catch {
     return { allowed: false, message: "Video quota check failed" };
   }
@@ -260,14 +270,27 @@ export interface RunMediaPlanOptions {
 
 export async function runMediaPlan(opts: RunMediaPlanOptions): Promise<void> {
   const { plan, onSceneStart, onSceneDone, onScenePartial, onSceneCountdown, shouldCancel } = opts;
-  await Promise.allSettled(
-    plan.scenes.map(async (scene) => {
+  // Keep premium video unlimited at the request level, but never fan out an
+  // unbounded number of provider jobs. This is the client-side admission layer
+  // until the durable Supabase worker is deployed; the provider must still
+  // enforce the authoritative per-user/global limits server-side.
+  const concurrency = plan.mode === "video" ? 2 : 4;
+  let nextIndex = 0;
+  const worker = async () => {
+    while (nextIndex < plan.scenes.length) {
+      const scene = plan.scenes[nextIndex++];
       if (shouldCancel?.()) return;
       onSceneStart(scene.index);
       try {
         const url =
           plan.mode === "video"
-            ? await generateVideoScene(scene, plan.modelSlug, onScenePartial, plan.aspectRatio, onSceneCountdown)
+            ? await generateVideoScene(
+                scene,
+                plan.modelSlug,
+                onScenePartial,
+                plan.aspectRatio,
+                onSceneCountdown,
+              )
             : await generateImageScene(scene, plan.modelSlug, onScenePartial, plan.aspectRatio);
         if (plan.mode === "images" && url) {
           try {
@@ -297,8 +320,9 @@ export async function runMediaPlan(opts: RunMediaPlanOptions): Promise<void> {
           type: plan.mode === "video" ? "video" : "image",
         });
       }
-    }),
-  );
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(concurrency, plan.scenes.length) }, worker));
 }
 
 export async function regenerateScene(
