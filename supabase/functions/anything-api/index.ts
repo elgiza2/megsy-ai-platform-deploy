@@ -1279,7 +1279,7 @@ Deno.serve(async (req) => {
 
     let slug = String(body?.model_slug ?? "").trim();
     slug = SLUG_ALIASES[slug] ?? slug;
-    if (!slug) slug = "deapi-flux-schnell";
+    if (!slug) slug = "runway-gen4-image-turbo";
 
     const rawImages: unknown =
       body?.reference_image_urls ?? body?.reference_image_url ?? body?.image_url ?? body?.images;
@@ -1298,17 +1298,25 @@ Deno.serve(async (req) => {
       .maybeSingle();
     const model: any = modelRow ?? null;
     const provider = String(
-      model?.provider ?? (slug.startsWith("renderful-") ? "renderful" : "deapi"),
-    );
+      slug.startsWith("runway-") ||
+      RUNWAY_MODEL_ALIASES[slug] ||
+      /^(gpt_image_2_5_flare|gpt_image_2_5_sunburst|seedream5_pro|gpt_image_2|grok_imagine_image_2|muse_image|gemini_image3\.1_flash|gen4_image_turbo)$/.test(slug)
+        ? "runway"
+        : model?.provider ?? (slug.startsWith("renderful-") ? "renderful" : "deapi"),
+    ).toLowerCase();
     const apiModel =
       model?.model_id_api ??
-      (provider === "deapi"
-        ? (DEAPI_MODELS[slug]?.api ?? "Flux1schnell")
-        : slug.replace(/^renderful-/, ""));
+      (provider === "runway"
+        ? (RUNWAY_MODEL_ALIASES[apiModel] ?? RUNWAY_MODEL_ALIASES[slug] ?? apiModel.replace(/-/g, "_"))
+        : provider === "deapi"
+          ? (DEAPI_MODELS[slug]?.api ?? "Flux1schnell")
+          : slug.replace(/^renderful-/, ""));
     const supportsEditing =
-      provider === "renderful"
-        ? !!RENDERFUL_I2I[apiModel]
-        : (DEAPI_MODELS[slug]?.edit ?? !!model?.supports_image_editing);
+      provider === "runway"
+        ? true
+        : provider === "renderful"
+          ? !!RENDERFUL_I2I[apiModel]
+          : (DEAPI_MODELS[slug]?.edit ?? !!model?.supports_image_editing);
 
     if (images.length > 0 && !supportsEditing) {
       return json({
@@ -1335,7 +1343,7 @@ Deno.serve(async (req) => {
 
     // Premium (non-free) image models: 3 per UTC day without a subscription,
     // unlimited for subscribers. Enforced in Postgres, so the UI can't bypass.
-    const isPremiumModel = !slug.startsWith("deapi-");
+    const isPremiumModel = provider !== "deapi";
     if (isPremiumModel) {
       const authHeader = req.headers.get("authorization") ?? "";
       const token = authHeader.replace(/^Bearer\s+/i, "");
@@ -1415,11 +1423,13 @@ Deno.serve(async (req) => {
     const runOne = async (
       attemptSlug: string,
     ): Promise<{ url: string; provider: string; slug: string; apiModel: string }> => {
-      const attemptProvider = attemptSlug.startsWith("runway-")
-        ? "runway"
-        : attemptSlug.startsWith("renderful-")
-          ? "renderful"
-          : "deapi";
+      const attemptProvider = attemptSlug === slug
+        ? provider
+        : attemptSlug.startsWith("runway-")
+          ? "runway"
+          : attemptSlug.startsWith("renderful-")
+            ? "renderful"
+            : "deapi";
       const attemptApiModel =
         attemptSlug === slug
           ? attemptProvider === "runway"
@@ -1465,13 +1475,15 @@ Deno.serve(async (req) => {
       return { url, provider: attemptProvider, slug: attemptSlug, apiModel: attemptApiModel };
     };
 
-    const attempts = [slug, ...(IMAGE_FALLBACK_CHAIN[slug] ?? ["deapi-flux-schnell"])]
+    // Never silently switch image providers: all image requests must stay on Runway.
+    const attempts = [slug]
       .filter((s, i, arr) => arr.indexOf(s) === i)
       // An editing request can only run on models that accept a reference image.
       .filter((s) => {
+        if (provider === "runway") return true;
         if (images.length === 0)
           return (
-            s.startsWith("runway-") || s.startsWith("renderful-") || DEAPI_MODELS[s]?.t2i !== false
+            s.startsWith("renderful-") || DEAPI_MODELS[s]?.t2i !== false
           );
         return s.startsWith("renderful-")
           ? !!RENDERFUL_I2I[s.replace(/^renderful-/, "")]

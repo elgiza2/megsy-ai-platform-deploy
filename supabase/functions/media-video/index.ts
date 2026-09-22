@@ -43,23 +43,27 @@ async function createRunwayTask(
   duration: number,
   aspectRatio: string | undefined,
 ) {
+  const imageToVideo = Boolean(image);
   const body: Record<string, unknown> = {
     model: model.replace(/^runway-/, ""),
     promptText: prompt,
     ratio: ratio(aspectRatio),
     duration,
   };
-  if (image) body.promptImage = image;
+  if (imageToVideo) body.promptImage = image;
 
-  const response = await fetch("https://api.dev.runwayml.com/v1/image_to_video", {
+  const response = await fetch(
+    `https://api.dev.runwayml.com/v1/${imageToVideo ? "image_to_video" : "text_to_video"}`,
+    {
     method: "POST",
     headers: {
       Authorization: `Bearer ${key}`,
       "X-Runway-Version": "2024-11-06",
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(body),
-  });
+      body: JSON.stringify(body),
+    },
+  );
   const text = await response.text();
   if (!response.ok) throw new Error(`Runway ${response.status}: ${text.slice(0, 240)}`);
   const result = JSON.parse(text);
