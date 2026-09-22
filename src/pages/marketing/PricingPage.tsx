@@ -40,7 +40,7 @@ import { isEgMode } from "@/lib/egMode";
 import { openCheckoutUrl } from "@/lib/openCheckout";
 import { isArabBilling, isArabRegion } from "@/lib/payRegion";
 import { useUserLang } from "@/lib/authI18n";
-import { useIntroTrialEligible } from "@/lib/introTrial";
+import { useIntroTrialEligible, markIntroTrialUsed } from "@/lib/introTrial";
 import { trackTikTokFunnelEvent } from "@/lib/analytics/tiktokPixel";
 import { cn } from "@/lib/utils";
 import { useUserPlan } from "@/hooks/useUserPlan";
@@ -263,6 +263,7 @@ const PricingPage = () => {
       const checkoutUrl = data?.url || data?.checkout_url;
       if (checkoutUrl) {
         markCheckoutOpened(interval);
+        if (trial) markIntroTrialUsed();
         openCheckoutUrl(checkoutUrl);
       } else throw new Error(data?.error || "Checkout failed");
     } catch (e: unknown) {
