@@ -26,7 +26,6 @@ interface CatalogRow {
   usd_price: number;
   egp_price: number | null;
   credits: number;
-  dodo_product_id: string | null;
   kashier_sku: string | null;
   trial_days: number;
 }
@@ -100,109 +99,9 @@ Deno.serve(async (request) => {
   const winback = payload.winback === true || payload.offer === "second_month";
   const provider = String(payload.provider ?? "kashier").toLowerCase();
 
-  // ---- Dodo Payments (global cards) ----------------------------------------
-  if (provider === "dodo") {
-    const apiKey = (
-      Deno.env.get("DODO_PAYMENTS_API_KEY") ||
-      Deno.env.get("DODO_API_KEY") ||
-      ""
-    ).trim();
-    if (!apiKey) return json({ error: "Dodo is not configured" }, 503);
-
-    let row = await resolveRow(tier, interval, { trial, winback });
-    if (!row) return json({ error: "This plan isn't available yet." }, 400);
-
-    // Win-back offers may fall back to the standard row, but a trial must never
-    // silently become a full-price charge.
-    let productId = String(payload.product_id ?? "").trim() || row.dodo_product_id || "";
-    if (!productId && !trial) {
-      const base = await catalogRow(tier, interval);
-      if (base?.dodo_product_id) {
-        row = base;
-        productId = base.dodo_product_id;
-      }
-    }
-    if (!productId) {
-      return json(
-        {
-          error: trial
-            ? "The trial offer is only available with local payment right now."
-            : "This option isn't available for card payment yet. Pick another plan.",
-        },
-        400,
-      );
-    }
-
-    const credits = Number(row.credits ?? 0);
-    // A catalog row may carry trial metadata, but a normal checkout must never
-    // become a trial unless the caller explicitly selected the trial offer.
-    const trialDays = trial ? Number(row.trial_days ?? 0) : 0;
-    const orderId = `dodo_${crypto.randomUUID()}`;
-    const site = (Deno.env.get("SITE_URL") || "https://megsyai.com").replace(/\/$/, "");
-    const apiBase =
-      (Deno.env.get("DODO_MODE") || "live").trim().toLowerCase() === "test"
-        ? "https://test.dodopayments.com"
-        : "https://live.dodopayments.com";
-
-    const dodoBody: Record<string, unknown> = {
-      product_id: productId,
-      quantity: 1,
-      payment_link: true,
-      return_url: `${site}/billing/success?provider=dodo&order=${encodeURIComponent(orderId)}`,
-      customer: {
-        email: user.email,
-        name: (user.user_metadata as Record<string, unknown> | null)?.full_name ?? user.email,
-      },
-      billing: { city: "Cairo", country: "EG", state: "Cairo", street: "N/A", zipcode: "00000" },
-      metadata: {
-        order_id: orderId,
-        user_id: user.id,
-        plan: tier,
-        credits: String(credits),
-        interval,
-        slot: row.interval,
-        trial_days: String(trialDays),
-      },
-    };
-    if (trialDays > 0) dodoBody.trial_period_days = trialDays;
-
-    const dodoRes = await fetch(`${apiBase}/subscriptions`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify(dodoBody),
-    });
-    const dodoJson = (await dodoRes.json().catch(() => ({}))) as Record<string, unknown>;
-    if (!dodoRes.ok) {
-      console.error("dodo checkout failed", dodoRes.status, JSON.stringify(dodoJson));
-      return json({ error: (dodoJson.message as string) || "Checkout failed" }, 502);
-    }
-    const url = (dodoJson.payment_link || dodoJson.checkout_url) as string | undefined;
-    if (!url) return json({ error: "Checkout failed" }, 502);
-
-    await admin.from("dodo_orders").insert({
-      order_id: orderId,
-      user_id: user.id,
-      plan: tier,
-      credits,
-      amount: Number(row.usd_price ?? 0),
-      currency: "USD",
-      status: "pending",
-      dodo_payment_id: (dodoJson.payment_id as string) ?? null,
-      dodo_subscription_id: (dodoJson.subscription_id as string) ?? null,
-      raw: dodoJson,
-    });
-
-    return json({
-      ok: true,
-      url,
-      checkout_url: url,
-      order_id: orderId,
-      product_id: productId,
-      slot: row.interval,
-      amount: Number(row.usd_price ?? 0),
-      currency: "USD",
-    });
-  }
+  // Kashier is the single site-wide payment provider. Reject legacy callers
+  // instead of silently routing them to another gateway.
+  if (provider !== "kashier") return json({ error: "Only Kashier payments are supported" }, 400);
 
   // ---- Kashier (Egypt: local cards + mobile wallets) ------------------------
   const method = String(payload.method ?? "card").toLowerCase();
