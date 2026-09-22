@@ -41,6 +41,7 @@ import {
   hasAbandonedCheckout,
   INTRO_PRICE,
 } from "@/lib/pricingOffers";
+import { openCheckoutUrl } from "@/lib/openCheckout";
 
 import { brandText, getZoneBrand } from "@/lib/zoneBrand";
 import { translateExactText, useUserLang } from "@/lib/authI18n";
@@ -300,7 +301,10 @@ const PricingPage = () => {
     }
 
     // Kashier is the single payment provider for every country and currency.
-    setGatewaySheet({ tier, interval, trial: false });
+    // Start the primary CTA directly with card checkout. The old lazy-loaded
+    // gateway picker could render no feedback when its chunk was unavailable,
+    // making the payment button appear unresponsive in production.
+    void runCheckout("local", { tier, interval, trial: false });
   };
 
   const runCheckout = async (
