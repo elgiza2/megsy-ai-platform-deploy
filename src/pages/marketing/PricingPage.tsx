@@ -101,6 +101,8 @@ const PricingPage = () => {
   const PLANS = brandText(RAW_PLANS);
   const FAQS = brandText(RAW_FAQS).slice(0, FAQ_LIMIT);
 
+  const showVodafoneCash = isAr || isEgMode() || isArabBilling() || arabRegion;
+
   const t = isAr
     ? {
         title: "خطة واحدة بسيطة، وكل حاجة جواها",
@@ -291,7 +293,7 @@ const PricingPage = () => {
           onClose={() => setGatewaySheet(null)}
           onSelect={runCheckout}
           loading={gatewayLoading}
-          options={isAr ? ["local", "wallets"] : ["local"]}
+          options={showVodafoneCash ? ["local", "wallets"] : ["local"]}
         />
       )}
     </Suspense>
