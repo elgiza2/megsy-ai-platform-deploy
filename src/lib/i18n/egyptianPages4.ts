@@ -122,8 +122,7 @@ export const EGYPTIAN_PAGES_4: Record<string, string> = {
     "من غير كارت. ومن غير تجديد تلقائي. برو بيبدأ أول ما خامس صاحب يسجل.",
   "Your invitation progress": "تقدّم دعوتك",
   "Pro is active": "برو شغّال",
-  "Your free Pro access is active.": "اشتراك برو المجاني شغّال.",
-  "Verified invitations count toward your free Pro access.":
+  "Verified invitations count toward your free Pro access":
     "الدعوات المؤكدة بتتحسب لاشتراك برو المجاني.",
   "Couldn't load your Pro progress. Refresh the page to try again.":
     "مقدرناش نحمّل تقدّم برو. اعمل تحديث للصفحة وجرّب تاني.",
@@ -139,12 +138,6 @@ export const EGYPTIAN_PAGES_4: Record<string, string> = {
   "Pro activated": "برو اتفعّل",
   "We couldn't activate Pro yet": "مقدرناش نفعّل برو لسه",
   "Activating Pro…": "بنفعّل برو…",
-  "Ready to claim your free Pro": "جاهز تاخد برو المجاني",
-  "member left to unlock Pro": "عضو فاضل عشان تفتح برو",
-  "members left to unlock Pro": "أعضاء فاضلين عشان تفتح برو",
-  "Only verified members who join with your link are counted.":
-    "بنحسب بس الأعضاء المؤكدين اللي دخلوا بلينكك.",
-  "Your free Pro access is active until": "برو المجاني شغّال لغاية",
   Earn: "اكسب",
   "of every payment": "من كل دفعة",
   "Your Pro access is unlocked, so your invite link now earns a recurring share of everything your members pay.":

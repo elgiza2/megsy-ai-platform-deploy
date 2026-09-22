@@ -256,7 +256,7 @@ const ReferralsPage = () => {
   const { pathname } = useLocation();
   const onRewards = pathname.endsWith("/rewards");
   const lang = useUserLang();
-  const isRtlUi = lang === "ar" || lang === "ar-eg" || lang === "he" || lang === "fa";
+  const isRtlUi = lang === "ar-eg";
   const milestone = useReferralMilestone();
   const [userId, setUserId] = useState<string | null>(null);
   const [code, setCode] = useState("");
