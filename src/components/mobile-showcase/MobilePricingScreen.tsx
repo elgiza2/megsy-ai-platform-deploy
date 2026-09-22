@@ -16,8 +16,6 @@ import { Link, useNavigate } from "react-router-dom";
 import MegsyStar from "@/components/branding/MegsyStar";
 import { MobileSidebarButton } from "@/components/shared/MobileSidebarButton";
 import { useUserLang } from "@/lib/authI18n";
-import { detectLocalMoney, formatLocalAmount } from "@/lib/localCurrency";
-import { useIntroTrialEligible } from "@/lib/introTrial";
 import { useUserPlan } from "@/hooks/useUserPlan";
 import { getDisplayPrice, getPlan, type PlanTier } from "@/data/pricingData";
 import {
@@ -31,16 +29,8 @@ function MegsyFeatureIcon({ className, style }: { className?: string; style?: Re
   return <MegsyStar className={className ?? "h-5 w-5"} />;
 }
 
-/**
- * "50 EGP" for a dollar amount, from the device's own country. Resolved after
- * mount so the first paint matches the server markup.
- */
 function useLocalPrice() {
-  const [money, setMoney] = useState<ReturnType<typeof detectLocalMoney>>(null);
-  useEffect(() => {
-    setMoney(detectLocalMoney());
-  }, []);
-  return (usd: number) => formatLocalAmount(usd, money);
+  return (_usd: number) => null;
 }
 
 
@@ -226,37 +216,15 @@ export default function MobilePricingScreen({
         ctaFg: "#0a0a0a",
       };
 
-  // The $1 / 3-day trial is not a box of its own: while the account has never
-  // used it, it *is* the monthly offer. After it is used the same box shows the
-  // $7 first month instead, and the trial never comes back.
-  const trialEligible = useIntroTrialEligible() && !alreadySubscribed;
-  const trialActive = trialEligible && !isYearly;
-
-  const trialCopy = isAr
-    ? {
-        label: "الشهر الأول — 3 أيام بـ 1$",
-        badge: "عرض البداية",
-        unit: "/ 3 أيام",
-        fine: `1$ لمدة 3 أيام، وخلال التجربة 3 صور متقدمة يوميًا. بعدها ${`$${INTRO_PRICE}`} للشهر الأول ثم $${pro.monthlyPrice}/شهر مع صور بلا حدود. يمكنك الإلغاء في أي وقت.`,
-        cta: "ابدأ 3 أيام بـ 1$",
-      }
-    : {
-        label: "Monthly — 3 days for $1",
-        badge: "INTRO OFFER",
-        unit: "/ 3 days",
-        fine: `$1 for 3 days, with 3 premium images per day during the trial. Then $${INTRO_PRICE}.00 for your first month and $${pro.monthlyPrice}.00/month after, with unlimited images. Cancel anytime.`,
-        cta: "Start 3 days for $1",
-      };
-
   const options = [
     {
       key: "monthly",
       yearly: false,
-      label: trialEligible ? trialCopy.label : t.monthly,
-      badge: trialEligible ? trialCopy.badge : t.introBadge,
-      price: trialEligible ? 1 : monthlyPrice,
-      strike: trialEligible ? INTRO_PRICE : monthly.strike,
-      unit: trialEligible ? trialCopy.unit : t.perMonth,
+      label: t.monthly,
+      badge: t.introBadge,
+      price: monthlyPrice,
+      strike: monthly.strike,
+      unit: t.perMonth,
     },
     {
       key: "yearly",
@@ -447,14 +415,14 @@ export default function MobilePricingScreen({
             className={`text-center leading-[1.45] ${compact ? "mb-2 min-h-[26px] text-[10px]" : "mb-2.5 min-h-[30px] text-[10.5px]"}`}
             style={{ color: c.faint }}
           >
-            {trialActive ? trialCopy.fine : t.fine}
+            {t.fine}
           </p>
           <button
             type="button"
             onClick={() =>
               alreadySubscribed
                 ? navigate("/settings/billing")
-                : onSubscribe("pro", { trial: trialActive })
+                : onSubscribe("pro", { trial: false })
             }
             disabled={isLoading}
             className={`flex w-full items-center justify-center rounded-[16px] px-6 font-semibold leading-none transition active:scale-[0.99] disabled:opacity-60 ${
@@ -465,7 +433,7 @@ export default function MobilePricingScreen({
             {isLoading ? (
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-current/30 border-t-current" />
             ) : (
-              trialActive ? trialCopy.cta : t.cta
+              t.cta
             )}
           </button>
           <nav

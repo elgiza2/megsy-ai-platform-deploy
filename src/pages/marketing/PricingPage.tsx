@@ -40,17 +40,10 @@ import {
   markCheckoutOpened,
   hasAbandonedCheckout,
   INTRO_PRICE,
-  TRIAL_PRICE,
-  TRIAL_DAYS,
 } from "@/lib/pricingOffers";
-import { dodoProductId } from "@/lib/dodoCatalog";
 
 import { brandText, getZoneBrand } from "@/lib/zoneBrand";
-import { isEgMode } from "@/lib/egMode";
-import { isArabBilling } from "@/lib/payRegion";
 import { translateExactText, useUserLang } from "@/lib/authI18n";
-import { detectLocalMoney, formatLocalAmount } from "@/lib/localCurrency";
-import { useIntroTrialEligible, markIntroTrialUsed } from "@/lib/introTrial";
 
 const LandingFooter = lazy(() => import("@/components/landing/LandingFooter"));
 const PaymentGatewaySheet = lazy(() => import("@/components/billing/PaymentGatewaySheet"));
@@ -209,15 +202,6 @@ const PricingPage = () => {
   const promo = usePromoCountdown();
   const lang = useUserLang();
   const isAr = typeof lang === "string" && lang.toLowerCase().startsWith("ar");
-  // Local-currency hint beside the USD price, resolved from the device only
-  // (timezone/locale) and read after mount so SSR markup stays stable.
-  const [localMoney, setLocalMoney] = useState<ReturnType<typeof detectLocalMoney>>(null);
-  useEffect(() => {
-    setLocalMoney(detectLocalMoney());
-  }, []);
-  // The $1 trial is a one-time offer; after it is used the card shows the $7
-  // first month in its place and the trial never returns.
-  const trialEligible = useIntroTrialEligible();
   const [sidebarCollapsed] = useSidebarCollapsed();
   const PLANS = brandText(RAW_PLANS);
   const FAQS = brandText(RAW_FAQS);
@@ -315,14 +299,8 @@ const PricingPage = () => {
       return;
     }
 
-    // Egypt edition or an Arabic account: Kashier (card + wallets) — show the picker.
-    if (isEgMode() || isArabBilling()) {
-      setGatewaySheet({ tier, interval, trial: opts.trial === true });
-      return;
-    }
-
-    // No gateway picker on the main site — go straight to Dodo Payments.
-    await runCheckout("global", { tier, interval, trial: opts.trial === true });
+    // Kashier is the single payment provider for every country and currency.
+    setGatewaySheet({ tier, interval, trial: false });
   };
 
   const runCheckout = async (
@@ -345,59 +323,19 @@ const PricingPage = () => {
         return;
       }
 
-      // Map user-facing option → backend provider.
-      // global → Dodo Payments, local/wallets → Kashier.
-      const provider = gateway === "global" ? "dodo" : "kashier";
+      // Both card and wallet options are handled by Kashier worldwide.
       const method = gateway === "wallets" ? "wallet" : "card";
-
-      // Kashier: server-side catalog decides amount/credits/plan. We only
-      // pass a sku that matches public.billing_skus.
-      if (provider === "kashier") {
-        // Kashier currently supports the local monthly plans. Yearly and
-        // business purchases stay unavailable until matching catalog items
-        // exist server-side, so checkout can never open with an invalid SKU.
-        const skuMap: Record<string, string> = {
-          "pro:monthly": "plan_pro_m_first",
-          "elite:monthly": "plan_elite_m",
-        };
-        // The 3-day trial has its own local SKU (~$1 in EGP).
-        const sku =
-          trial && tier === "pro" && interval === "monthly"
-            ? "plan_pro_m_trial"
-            : skuMap[`${tier}:${interval}`];
-        if (!sku) {
-          throw new Error("This plan isn't available for local payment yet.");
-        }
-
-        const { data: kData, error: kErr } = await supabase.functions.invoke("kashier-checkout", {
-          body: {
-            sku,
-            method,
-            display: isEgMode() || isArabBilling() ? "ar" : "en",
-          },
-        });
-        if (kErr || !kData?.checkout_url) {
-          throw new Error(kErr?.message || kData?.error || "Checkout failed");
-        }
-        markCheckoutOpened(interval);
-        // The $1 trial is once per account: never offer it again on this device.
-        if (trial) markIntroTrialUsed();
-        window.location.href = kData.checkout_url;
-        return;
-      }
-
-      const { data, error } = await invokeFunction("openrouter-media", {
+      const { data, error } = await invokeFunction("kashier-checkout", {
         body: {
           kind: "checkout",
           tier,
           interval,
-          trial,
-          // A trial checkout is the $1 / 3-day offer.
-          free_trial: trial,
-          provider,
-          // Dodo product to open. The trial has its own product in Dodo, so the
-          // server picks it instead of the standard monthly product.
-          ...(trial ? {} : { product_id: dodoProductId(interval, hasAbandonedCheckout()) }),
+          trial: false,
+          free_trial: false,
+          provider: "kashier",
+          winback: hasAbandonedCheckout(),
+          method,
+          display: "en",
         },
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
@@ -412,10 +350,10 @@ const PricingPage = () => {
         }
         throw error;
       }
-      if (data?.url) {
+      const checkoutUrl = data?.url || data?.checkout_url;
+      if (checkoutUrl) {
         markCheckoutOpened(interval);
-        if (trial) markIntroTrialUsed();
-        window.location.href = data.url;
+        openCheckoutUrl(checkoutUrl);
       } else throw new Error(data?.error || "Checkout failed");
     } catch (e: any) {
       toast.error(e?.message || "Failed to open checkout. Please try again.");
@@ -425,18 +363,6 @@ const PricingPage = () => {
       setGatewaySheet(null);
     }
   };
-
-  // Arriving from the onboarding "3 days free" button opens trial checkout once.
-  const trialAutoStarted = useRef(false);
-  useEffect(() => {
-    if (trialAutoStarted.current) return;
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("offer") !== "free_trial") return;
-    trialAutoStarted.current = true;
-    void handleSubscribe("pro", { trial: true, interval: "monthly" });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
 
   const scrollTo = (id: string) => {
     if (id.startsWith("#")) {
@@ -489,7 +415,7 @@ const PricingPage = () => {
               onSelect={runCheckout}
               loading={gatewayLoading}
               options={["local", "wallets"]}
-              labels={{ local: "Visa / Mastercard", wallets: "Vodafone Cash" }}
+              labels={{ local: "Card · Kashier", wallets: "Wallet · Kashier" }}
             />
           )}
         </Suspense>
@@ -767,7 +693,7 @@ const PricingPage = () => {
                           {"Limited Launch Offer"}
                         </span>
                         <p className="text-[13px] text-foreground/90 leading-relaxed max-w-[16rem] sm:max-w-[18rem]">
-                          {`Pro ${TRIAL_DAYS} days for $${TRIAL_PRICE} — renews at $${INTRO_PRICE} for your first month, then $20/month`}
+                          {`Megsy Pro — $7 for your first month, then $20/month`}
                         </p>
                       </div>
                       <div
@@ -836,18 +762,17 @@ const PricingPage = () => {
                   </p>
 
                   <div className="mx-auto mt-6 max-w-md rounded-2xl border border-foreground/30 bg-foreground/[0.08] px-5 py-4 text-center backdrop-blur-md">
-                    <p className="text-lg font-semibold text-foreground">3 days of Megsy Pro for $1</p>
+                    <p className="text-lg font-semibold text-foreground">Megsy Pro — $7 first month</p>
                     <p className="mt-1.5 text-sm leading-relaxed text-foreground/80">
-                      Includes 3 premium images every day. Then $7 for your first month with
-                      unlimited premium images. Cancel anytime.
+                      Start at $7 for your first month, then $20/month with unlimited premium images. Cancel anytime.
                     </p>
                     <button
                       type="button"
-                      onClick={() => handleSubscribe("pro", { trial: true, interval: "monthly" })}
+                      onClick={() => handleSubscribe("pro", { trial: false, interval: "monthly" })}
                       disabled={loadingTier !== null}
                       className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-foreground px-5 text-sm font-semibold text-background transition-opacity hover:opacity-90 disabled:opacity-50"
                     >
-                      {loadingTier === "pro" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Start for $1"}
+                      {loadingTier === "pro" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Start for $7"}
                     </button>
                   </div>
 
@@ -918,11 +843,7 @@ const PricingPage = () => {
                     const curIdx = order.indexOf(cur);
                     const thisIdx = order.indexOf(p.tier);
                     const isCurrent = curIdx === thisIdx;
-                    // Monthly Pro leads with the $1 / 3-day trial: it renews into the
-                    // $7 intro month automatically, so the intro price is the follow-up,
-                    // not the headline.
-                    const showTrialOffer =
-                      p.tier === "pro" && !isYearly && !isCurrent && trialEligible;
+                    const showTrialOffer = false;
                     const isLower = thisIdx < curIdx;
                     const ctaLabel = isCurrent
                       ? "Current plan"
@@ -948,28 +869,16 @@ const PricingPage = () => {
                           </h3>
 
                           {(() => {
-                            const shown = showTrialOffer ? TRIAL_PRICE : price;
-                            const struck = showTrialOffer ? INTRO_PRICE : strikePrice;
-                            // The visitor's own currency is the headline price;
-                            // the dollar amount stays as the small reference below.
-                            const localShown = formatLocalAmount(shown, localMoney);
-                            const localStruck = formatLocalAmount(struck, localMoney);
+                            const shown = price;
+                            const struck = strikePrice;
                             return (
                               <>
                                 <div className="flex items-baseline gap-1.5">
-                                  {localShown ? (
-                                    <span className="font-garamond text-5xl leading-none text-foreground tabular-nums">
-                                      {localShown}
-                                    </span>
-                                  ) : (
-                                    <>
-                                      <span className="font-garamond text-2xl text-foreground">$</span>
-                                      <CountUp
-                                        value={shown}
-                                        className="font-garamond text-6xl leading-none text-foreground tabular-nums"
-                                      />
-                                    </>
-                                  )}
+                                  <span className="font-garamond text-2xl text-foreground">$</span>
+                                  <CountUp
+                                    value={shown}
+                                    className="font-garamond text-6xl leading-none text-foreground tabular-nums"
+                                  />
                                   <span
                                     className="text-foreground text-xs ml-1 uppercase"
                                     style={{ letterSpacing: "0.2em" }}
@@ -987,7 +896,7 @@ const PricingPage = () => {
 
                                 <div className="flex items-center gap-2 mt-3">
                                   <span className="text-xs text-foreground/85 line-through tabular-nums">
-                                    {localStruck ?? `$${struck}`}
+                                    {`$${struck}`}
                                   </span>
                                   <span
                                     className="text-[10px] uppercase px-2 py-0.5 rounded-full border border-foreground/40 text-foreground font-light"
@@ -997,11 +906,7 @@ const PricingPage = () => {
                                   </span>
                                 </div>
 
-                                {localShown ? (
-                                  <p className="text-[11px] text-foreground/70 mt-2 tabular-nums font-light">
-                                    ${shown} USD
-                                  </p>
-                                ) : null}
+                                <p className="text-[11px] text-foreground/70 mt-2 tabular-nums font-light">USD</p>
                               </>
                             );
                           })()}
@@ -1059,34 +964,17 @@ const PricingPage = () => {
                           {p.tier !== "starter" && (
                             <button
                               type="button"
-                              onClick={() =>
-                                showTrialOffer
-                                  ? handleSubscribe("pro", { trial: true, interval: "monthly" })
-                                  : handleSubscribe(p.tier)
-                              }
+                              onClick={() => handleSubscribe(p.tier)}
                               disabled={loadingTier !== null || isCurrent}
                               className={`liquid-glass w-full py-3.5 rounded-full text-xs uppercase font-normal text-foreground disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2 ${isElite ? "bg-foreground/[0.04]" : ""}`}
                               style={{ letterSpacing: "0.2em" }}
                             >
                               {loadingTier === p.tier ? (
                                 <Loader2 className="w-4 h-4 animate-spin" />
-                              ) : showTrialOffer ? (
-                                `Start ${TRIAL_DAYS} days for $${TRIAL_PRICE}`
                               ) : (
                                 ctaLabel
                               )}
                             </button>
-                          )}
-
-                          {/* One offer at a time: while the $1 trial is available it
-                              stands in for the $7 first month, so there is no second
-                              box competing with it. */}
-                          {showTrialOffer && (
-                            <p className="text-[10px] text-foreground/75 mt-2 leading-relaxed">
-                              Trial: 3 premium images per day. It renews automatically after{" "}
-                              {TRIAL_DAYS} days at ${INTRO_PRICE} for your first month, then $
-                              {p.monthlyPrice}/month with unlimited images. Cancel anytime.
-                            </p>
                           )}
 
                           {(() => {
@@ -1277,7 +1165,7 @@ const PricingPage = () => {
                     onSelect={runCheckout}
                     loading={gatewayLoading}
                     options={["local", "wallets"]}
-                    labels={{ local: "Visa / Mastercard", wallets: "Vodafone Cash" }}
+                    labels={{ local: "Card · Kashier", wallets: "Wallet · Kashier" }}
                     title="Choose payment method"
                     subtitle="Pay with Kashier."
                   />
