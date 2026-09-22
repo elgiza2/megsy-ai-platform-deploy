@@ -284,7 +284,7 @@ export const SERVICES_GUIDE: { name: string; desc: string }[] = [
 export const FAQS: { q: string; a: string }[] = [
   {
     q: "How does the introductory first month work?",
-    a: "Eligible accounts can start with the 3-day trial shown above for $1. After the trial, Pro renews at the standard monthly price shown on the plan card. Any introductory monthly price is displayed separately, and you can cancel anytime from Billing.",
+    a: "Eligible accounts can start with 7 days of unlimited video generation for $7. After the offer, Pro renews at the standard monthly price shown on the plan card. You can cancel anytime from Billing.",
   },
   {
     q: "Can I change or cancel my plan anytime?",

@@ -270,10 +270,10 @@ export default function MobilePricingScreen({
         ctaFg: "#0a0a0a",
       };
 
-  // The $1 / 3-day trial is not a box of its own: while the account has never
+  // The $7 / 7-day unlimited-video offer is not a box of its own: while the account has never
   // used it, it *is* the monthly offer. It only shows when the catalog actually
-  // has a sellable trial row, so the price on screen is always chargeable.
-  // The trial is sold through the local (Kashier) gateway only, so it is shown
+  // has a sellable 7-day offer row, so the price on screen is always chargeable.
+  // The offer is sold through Kashier and is shown
   // to Arab-region visitors exclusively.
   const [arabRegion, setArabRegion] = useState(false);
   useEffect(() => {
@@ -289,18 +289,18 @@ export default function MobilePricingScreen({
 
   const trialCopy = isAr
     ? {
-        label: "الشهر الأول",
-        badge: `${trialDays} أيام بـ ${trialUsd}$`,
+        label: "عرض الفيديوهات",
+        badge: `${trialDays} أيام فيديو بلا حدود بـ ${trialUsd}$`,
         unit: "",
-        fine: `${trialDays} أيام بـ ${trialUsd}$ فقط. بعدها ${introUsd}$ للشهر الأول ثم ${pro.monthlyPrice}$ شهريًا. إلغاء في أي وقت.`,
-        cta: `ابدأ ${trialDays} أيام بـ ${trialUsd}$`,
+        fine: `${trialDays} أيام فيديو بلا حدود بـ ${trialUsd}$ فقط. بعدها ${introUsd}$ للشهر الأول ثم ${pro.monthlyPrice}$ شهريًا. إلغاء في أي وقت.`,
+        cta: `ابدأ ${trialDays} أيام فيديو بلا حدود بـ ${trialUsd}$`,
       }
     : {
-        label: "First month",
-        badge: `${trialDays} days for $${trialUsd}`,
+        label: "Video offer",
+        badge: `${trialDays} days of unlimited videos — $${trialUsd}`,
         unit: "",
         fine: `$${trialUsd} for ${trialDays} days. Then $${introUsd} first month, $${pro.monthlyPrice}/month after. Cancel anytime.`,
-        cta: `Start ${trialDays} days for $${trialUsd}`,
+        cta: `Start ${trialDays} days of unlimited videos for $${trialUsd}`,
       };
 
   const options = [

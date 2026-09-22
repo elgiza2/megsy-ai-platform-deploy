@@ -1,4 +1,4 @@
-/** @doc Eligibility for the one-time $1 / 3-day intro trial.
+/** @doc Eligibility for the one-time $7 / 7-day unlimited-video offer.
  *
  *  The trial replaces the $7 first-month offer while the user has never taken
  *  it. Only a confirmed trial checkout consumes it; a regular subscription, an
@@ -76,7 +76,7 @@ export async function hasUsedIntroTrial(): Promise<boolean> {
 }
 
 /**
- * `true` while the $1 trial may still be offered. Re-checks whenever the
+ * `true` while the $7 video offer may still be offered. Re-checks whenever the
  * signed-in account changes, so switching or signing out restores the offer
  * for an account that never used it.
  */

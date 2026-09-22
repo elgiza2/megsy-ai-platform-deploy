@@ -3,8 +3,7 @@
  *
  * The Egyptian version of the site lives under `megsyai.com/eg`. Entering
  * that path switches the whole UI to the Egyptian Arabic dialect (`ar-eg`)
- * and locks payments to Kashier (Visa card + Vodafone Cash). The main site
- * keeps Dodo Payments only and never shows Kashier.
+ * and uses the same site-wide Kashier payment gateway as the main site.
  */
 import { setUserLang } from "@/lib/authI18n";
 

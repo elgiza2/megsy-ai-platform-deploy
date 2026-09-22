@@ -28,7 +28,6 @@ export interface CatalogEntry {
   usd: number;
   egp: number | null;
   credits: number;
-  dodoProductId: string | null;
   kashierSku: string | null;
   trialDays: number;
 }
@@ -38,7 +37,7 @@ export const PRICING_FALLBACK: CatalogEntry[] = [
   entry("pro", "monthly", 20, 999, 240),
   entry("pro", "monthly_intro", 7, 349, 240),
   entry("pro", "monthly_winback", 5, 249, 240),
-  { ...entry("pro", "monthly_trial", 1, 49, 240), trialDays: 3 },
+  { ...entry("pro", "monthly_trial", 7, 349, 240), trialDays: 7 },
   entry("pro", "yearly", 160, 7999, 3600),
   entry("pro", "yearly_winback", 149, 7499, 3600),
   entry("elite", "monthly", 40, 1999, 600),
@@ -62,7 +61,6 @@ function entry(
     usd,
     egp,
     credits,
-    dodoProductId: null,
     kashierSku: null,
     trialDays: 0,
   };
@@ -80,7 +78,7 @@ export async function loadBillingCatalog(): Promise<CatalogEntry[]> {
       const { data, error } = await supabase
         .from("billing_catalog")
         .select(
-          "tier, interval, base_interval, usd_price, egp_price, credits, dodo_product_id, kashier_sku, trial_days",
+          "tier, interval, base_interval, usd_price, egp_price, credits, kashier_sku, trial_days",
         )
         .eq("active", true);
       if (error || !data?.length) return PRICING_FALLBACK;
@@ -93,7 +91,6 @@ export async function loadBillingCatalog(): Promise<CatalogEntry[]> {
         usd: Number(row.usd_price),
         egp: row.egp_price === null ? null : Number(row.egp_price),
         credits: Number(row.credits ?? 0),
-        dodoProductId: row.dodo_product_id ?? null,
         kashierSku: row.kashier_sku ?? null,
         trialDays: Number(row.trial_days ?? 0),
       }));
@@ -161,7 +158,7 @@ export function priceFor(
   );
 }
 
-/** True when the paid trial is actually sellable (a row exists and is active). */
+/** True when the 7-day video offer is actually sellable (a row exists and is active). */
 export function trialAvailable(entries: CatalogEntry[], tier: CatalogTier = "pro"): boolean {
   return !!findEntry(entries, tier, "monthly_trial");
 }

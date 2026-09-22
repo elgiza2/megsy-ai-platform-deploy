@@ -182,7 +182,7 @@ export default function FeatureShowcase({
           onClick={continueFlow}
           className="h-14 w-full rounded-md bg-[hsl(var(--welcome-ink))] text-base font-bold !text-[hsl(var(--welcome-paper))] shadow-none hover:bg-[hsl(var(--welcome-ink)/.9)]"
         >
-          {isTrial ? "Start 3 days for $1" : "Continue"}
+          {isTrial ? "Start 7 days of unlimited videos for $7" : "Continue"}
           {!isTrial && <ArrowRight className="size-5" />}
         </Button>
 
@@ -281,7 +281,7 @@ function TrialScreen() {
 
       <div className="relative z-10 shrink-0 px-7 pt-4 text-left">
         <h2 className="max-w-[330px] break-words text-[32px] font-extrabold leading-[1.06] text-[hsl(var(--welcome-ink))] sm:text-[40px]">
-          3 days for $1.
+          7 days of unlimited videos for $7.
         </h2>
         <p className="mt-2.5 max-w-[330px] break-words text-[14px] font-medium leading-[1.45] text-[hsl(var(--welcome-muted))] sm:text-[16px]">
           3 premium images a day during the trial. Then $7 for your first month with unlimited

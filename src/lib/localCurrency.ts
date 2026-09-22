@@ -1,7 +1,7 @@
 /**
  * Local-currency display for prices.
  *
- * Checkout itself is charged in USD (Dodo) or EGP (Kashier). This module only
+ * Checkout itself is charged in EGP through Kashier. This module only
  * adds a familiar-looking secondary price so an Arabic visitor is not forced to
  * convert dollars in their head. Rates are indicative and rounded on purpose —
  * every rendered string is prefixed with "≈".

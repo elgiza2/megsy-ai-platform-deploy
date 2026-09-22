@@ -40,8 +40,7 @@ Pages: / (landing) · /about · /pricing · /features-guide · /plans-models ·
 
 Plans: a free tier with unlimited Megsy chat, plus paid plans (Pro and Max) that
 add credits (MC) for images/video/premium runs, priority speed, longer context,
-team features and priority support. Payments are processed by Dodo Payments and
-appear as "DODO * MEGSY AI". Prices exclude tax.
+team features and priority support. Payments are processed securely by Kashier. Prices exclude tax.
 
 Company: Megsy for Digital Platforms & E-Commerce Development LLC, Cairo, Egypt.
 Emails: support@ (general/billing), privacy@, security@, legal@, abuse@ —

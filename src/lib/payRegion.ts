@@ -2,7 +2,7 @@
  * @doc Billing region
  *
  * Chosen at sign-up: Arabic users are billed through Kashier (card +
- * e-wallets), everyone else through Dodo Payments. Stored locally and on the
+ * e-wallets) for every visitor. Stored locally and on the
  * auth user metadata so it survives across devices.
  */
 export type PayRegion = "arab" | "global";
@@ -34,7 +34,7 @@ export function isArabBilling(): boolean {
 
 /**
  * Best guess for a first-time visitor: Arabic browser language or an Arab
- * timezone → the Arabic (Kashier) edition, everyone else → global (Dodo).
+ * timezone → the Arabic (Kashier) edition, with Kashier used site-wide.
  */
 export function guessPayRegion(): PayRegion {
   if (typeof window === "undefined") return "global";
@@ -73,7 +73,7 @@ const ARAB_COUNTRY_CODES = new Set([
 ]);
 
 /**
- * True when the visitor should see the Arabic-region offers (the $1 / 3-day
+ * True when the visitor should see the Arabic-region offers (the $7 / 7-day
  * trial is sold through Kashier only). Uses the stored billing region first,
  * then the country resolved from the connection, then the browser guess.
  */

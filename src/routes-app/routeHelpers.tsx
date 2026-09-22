@@ -1,5 +1,5 @@
 import { useEffect, useState, useTransition, useDeferredValue } from "react";
-import { Routes, Navigate, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { Routes, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import PageTransition from "@/components/common/PageTransition";
@@ -234,23 +234,6 @@ export const InternalLinkInterceptor = () => {
     document.addEventListener("click", onClick);
     return () => document.removeEventListener("click", onClick);
   }, [location.hash, location.pathname, location.search, navigate, startNav]);
-
-  return null;
-};
-
-export const DodoReturnRedirect = () => {
-  const [params] = useSearchParams();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (params.get("dodo_return") === "1") {
-      const next = new URLSearchParams(params);
-      next.delete("dodo_return");
-      navigate(`/billing/success?${next.toString()}`, { replace: true });
-    } else if (params.get("checkout_cancelled") === "1") {
-      navigate("/pricing", { replace: true });
-    }
-  }, [navigate, params]);
 
   return null;
 };

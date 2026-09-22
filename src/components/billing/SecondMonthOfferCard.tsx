@@ -10,8 +10,6 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { invokeFunction } from "@/lib/supabaseFunction";
 import { SECOND_MONTH_OFFER } from "@/data/pricingData";
-import { isEgMode } from "@/lib/egMode";
-import { isArabBilling } from "@/lib/payRegion";
 import { trackTikTokFunnelEvent } from "@/lib/analytics/tiktokPixel";
 import { openCheckoutUrl } from "@/lib/openCheckout";
 
@@ -33,7 +31,7 @@ export default function SecondMonthOfferCard({ tier = "pro" }: Props) {
     trackTikTokFunnelEvent("InitiateCheckout", {
       contentId: `${tier}:second_month`,
       contentName: `${tier} second month offer`,
-      currency: "USD",
+      currency: "EGP",
     });
 
     try {
@@ -45,20 +43,18 @@ export default function SecondMonthOfferCard({ tier = "pro" }: Props) {
         return;
       }
 
-      // One payload for both gateways: the server resolves the catalog row and
-      // therefore the price, the credits and the product id.
-      const local = isEgMode() || isArabBilling();
+      // All subscription payments are processed by Kashier.
       const { data, error } = await invokeFunction("kashier-checkout", {
         body: {
           kind: "checkout",
-          provider: local ? "kashier" : "dodo",
+          provider: "kashier",
           tier,
           interval: "monthly",
           trial: false,
           offer: "second_month",
           winback: true,
           method: "card",
-          display: local ? "ar" : "en",
+          display: "en",
         },
         headers: { Authorization: `Bearer ${session.access_token}` },
       });

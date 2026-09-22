@@ -27,7 +27,6 @@ import {
   DeferredRoutes,
   ScrollToTop,
   InternalLinkInterceptor,
-  DodoReturnRedirect,
 } from "@/routes-app/routeHelpers";
 import { AppRoutes } from "@/routes-app/AppRoutes";
 import { applyTheme } from "@/lib/theme";
@@ -207,7 +206,6 @@ const App = () => {
                     <PageViewTracker />
                     <SeedanceOfferDialog />
                     <InternalLinkInterceptor />
-                    <DodoReturnRedirect />
                     <MarketingTypographyScope />
 
                     <Suspense fallback={null}>

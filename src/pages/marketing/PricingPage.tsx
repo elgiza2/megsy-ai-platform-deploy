@@ -5,7 +5,7 @@
  * text animations, count-up numbers, long feature lists and a wall of copy.
  * People come here to compare two prices, so this page shows exactly that —
  * a short headline, a billing switch, two cards with five lines each, and a
- * small FAQ. All checkout behaviour (Dodo globally, Kashier for Egypt/Arabic
+ * small FAQ. All checkout behaviour uses Kashier
  * billing, the one-time trial) is unchanged.
  */
 import { Suspense, lazy, useEffect, useRef, useState } from "react";
@@ -84,7 +84,7 @@ const PricingPage = () => {
   // number on screen is the number the payment page charges.
   const { entries: catalog } = useBillingCatalog();
   const [winbackOffer, setWinbackOffer] = useState(false);
-  // The $1 / 3-day trial runs through the local (Kashier) gateway. Eligibility
+  // The $7 / 7-day unlimited-video offer runs through Kashier. Eligibility
   // is account/catalog based; geo only selects the default gateway for regular
   // subscriptions and must not hide a valid trial.
   const [arabRegion, setArabRegion] = useState(() => isArabRegion());
@@ -113,7 +113,7 @@ const PricingPage = () => {
         perMonth: "/ شهر",
         perYear: "/ سنة",
         popular: "الأكثر اختيارًا",
-        trial: `جرّب ${TRIAL_DAYS} أيام بـ ${TRIAL_PRICE}$`,
+        trial: `فيديوهات بلا حدود لمدة ${TRIAL_DAYS} أيام بـ ${TRIAL_PRICE}$`,
         checkoutNote: "المبلغ النهائي والعملة بيظهروا بوضوح في صفحة الدفع قبل التأكيد.",
         faq: "أسئلة شائعة",
         subscribed: "أنت بالفعل مشترك",
@@ -131,7 +131,7 @@ const PricingPage = () => {
         perMonth: "/ month",
         perYear: "/ year",
         popular: "Most popular",
-        trial: `Try ${TRIAL_DAYS} days for $${TRIAL_PRICE}`,
+        trial: `Unlimited videos for ${TRIAL_DAYS} days — $${TRIAL_PRICE}`,
         checkoutNote:
           "The final local-currency amount is shown by the payment provider before you confirm.",
         faq: "Questions",
@@ -192,21 +192,14 @@ const PricingPage = () => {
       return;
     }
 
-    // The $1/3-day trial is only sold through the local gateway. Keep this
-    // explicit so a delayed geo lookup can never send a trial to Dodo.
+    // All visitors use Kashier. The picker only chooses the Kashier method
+    // (bank card or mobile wallet); no regional fallback can select another provider.
     if (opts.trial === true) {
       await runCheckout("local", { tier, interval, trial: true });
       return;
     }
 
-    // Egypt edition, an Arabic account, or an Arab-region visitor: Kashier
-    // (card + wallets) — show the picker.
-    if (isEgMode() || isArabBilling() || arabRegion || isArabRegion()) {
-      setGatewaySheet({ tier, interval, trial: false });
-      return;
-    }
-
-    await runCheckout("global", { tier, interval, trial: false });
+    setGatewaySheet({ tier, interval, trial: false });
   };
 
   const runCheckout = async (
@@ -229,7 +222,8 @@ const PricingPage = () => {
         return;
       }
 
-      const provider = gateway === "global" ? "dodo" : "kashier";
+      // Kashier is the only payment provider supported by the site.
+      const provider = "kashier";
       const method = gateway === "wallets" ? "wallet" : "card";
       const winback = hasAbandonedCheckout();
 
@@ -278,7 +272,7 @@ const PricingPage = () => {
     }
   };
 
-  // Arriving from the onboarding "3 days free" button opens trial checkout once.
+  // Arriving from onboarding opens the 7-day video offer checkout once.
   const trialAutoStarted = useRef(false);
   useEffect(() => {
     if (trialAutoStarted.current) return;
@@ -297,7 +291,7 @@ const PricingPage = () => {
           onClose={() => setGatewaySheet(null)}
           onSelect={runCheckout}
           loading={gatewayLoading}
-          options={["local", "wallets", "global"]}
+          options={isAr ? ["local", "wallets"] : ["local"]}
         />
       )}
     </Suspense>

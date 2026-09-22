@@ -118,8 +118,8 @@ const ROWS: Array<{
     id: "wallets",
     label: "Mobile wallet",
     labelAr: "محفظة موبايل",
-    caption: "Vodafone Cash and others",
-    captionAr: "فودافون كاش وغيرها",
+    caption: "Vodafone Cash",
+    captionAr: "فودافون كاش",
   },
 ];
 

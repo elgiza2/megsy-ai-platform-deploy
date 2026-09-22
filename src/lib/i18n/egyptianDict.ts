@@ -119,7 +119,7 @@ export const EGYPTIAN_DICT: Record<string, string> = {
 "All in One": "الكل في واحد",
 "All options are available worldwide.": "جميع الخيارات متاحة في جميع أنحاء العالم.",
 "All outputs are ready.": "جميع المخرجات جاهزة.",
-"All payments are processed by Dodo Payments, a PCI-DSS Level 1 merchant of record. Your card details never touch our servers. We accept Visa, Mastercard, American Express, JCB, UnionPay, Apple Pay, Google Pay, Amazon Pay and WeChat Pay, with 3-D Secure 2 on eligible transactions. Your bank statement will show \"DODO * MEGSY AI\".": "كل المدفوعات بتتم عن طريق Dodo Payments، وهي مرخصة PCI-DSS Level 1. بيانات كارتك مش بتوصل لسيرفراتنا. بنقبل Visa وMastercard وAmerican Express وJCB وUnionPay وApple Pay وGoogle Pay وAmazon Pay وWeChat Pay، مع 3-D Secure 2 في العمليات المؤهلة. هتلاقي في كشف حسابك «DODO * MEGSY AI».",
+"All payments are processed securely by Kashier. Your card details never touch our servers. We accept Visa, Mastercard and mobile wallets.": "كل المدفوعات بتتم عن طريق Dodo Payments، وهي مرخصة PCI-DSS Level 1. بيانات كارتك مش بتوصل لسيرفراتنا. بنقبل Visa وMastercard وAmerican Express وJCB وUnionPay وApple Pay وGoogle Pay وAmazon Pay وWeChat Pay، مع 3-D Secure 2 في العمليات المؤهلة. هتلاقي في كشف حسابك «DODO * MEGSY AI».",
 "All premium image models": "جميع نماذج الصور المميزة",
 "All settings": "جميع الإعدادات",
 "All systems normal": "جميع الأنظمة طبيعية",
