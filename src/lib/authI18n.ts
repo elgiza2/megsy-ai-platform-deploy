@@ -334,13 +334,14 @@ export async function setUserLang(
 }
 
 /**
- * Run once on app boot: apply the stored language, or detect + persist it on
+ * Run once on app boot: apply the stored language, or persist English on
  * the first visit so the choice stays stable.
  */
 export async function initUserLang(): Promise<AuthLang> {
   let lang = readStoredLang();
   if (!lang) {
-    lang = detectLang();
+    // English is the product default. Arabic remains available as an explicit choice.
+    lang = "en";
     persistLangLocally(lang);
   }
   applyHtmlLang(lang);
