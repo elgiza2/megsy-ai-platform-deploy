@@ -2,9 +2,9 @@
  *
  *  Two offers, both driven by what the user already did:
  *
- *  1. Abandoned checkout → win-back price.
- *     When the user opens checkout and comes back to /pricing without paying,
- *     the intro price drops from $7 to $5 (monthly) for a limited window.
+ *  1. Abandoned checkout → the same fixed first-month price.
+ *     Returning to /pricing after an incomplete checkout must never change
+ *     the advertised first-month price.
  *
  *  2. Second month at the intro price (handled by SecondMonthOfferCard) is only
  *     shown AFTER a successful first payment — never before.
@@ -21,8 +21,8 @@ export const INTRO_PRICE = 7;
 export const TRIAL_PRICE = 7;
 /** Length of the video offer, in days. */
 export const TRIAL_DAYS = 7;
-/** Win-back price after an abandoned checkout. */
-export const WINBACK_PRICE = 5;
+/** Keep the first-month offer fixed at $7 even after an abandoned checkout. */
+export const WINBACK_PRICE = INTRO_PRICE;
 /** Win-back yearly price (one month equivalent off the intro). */
 export const WINBACK_YEARLY_PRICE = 149;
 /** How long the win-back price stays valid. */

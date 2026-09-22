@@ -18,12 +18,6 @@ import { MobileSidebarButton } from "@/components/shared/MobileSidebarButton";
 import { useUserLang } from "@/lib/authI18n";
 import { useUserPlan } from "@/hooks/useUserPlan";
 import { getDisplayPrice, getPlan, type PlanTier } from "@/data/pricingData";
-import {
-  INTRO_PRICE,
-  WINBACK_PRICE,
-  WINBACK_YEARLY_PRICE,
-  hasAbandonedCheckout,
-} from "@/lib/pricingOffers";
 
 function MegsyFeatureIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return <MegsyStar className={className ?? "h-5 w-5"} />;
@@ -99,6 +93,7 @@ export default function MobilePricingScreen({
           { icon: Bot, text: "3 وكلاء متوازيين" },
           { icon: Search, text: "بحث عميق موثّق بالمصادر" },
           { icon: InfinityIcon, text: "دردشة وتوليد صور بلا حدود" },
+          { icon: InfinityIcon, text: "فيديوهات بلا حدود لمدة 7 أيام" },
         ]
       : [
           { icon: Monitor, text: "A real cloud computer" },
@@ -106,6 +101,7 @@ export default function MobilePricingScreen({
           { icon: Bot, text: "3 agents in parallel" },
           { icon: Search, text: "Deep research with citations" },
           { icon: InfinityIcon, text: "Unlimited chat & images" },
+          { icon: InfinityIcon, text: "Unlimited videos for 7 days" },
         ];
 
     const head = {
@@ -123,18 +119,12 @@ export default function MobilePricingScreen({
   }, [isAr, isYearly]);
 
 
-  // Win-back: the user opened checkout, came back without paying.
-  const [winback, setWinback] = useState(false);
-  useEffect(() => {
-    setWinback(hasAbandonedCheckout());
-  }, []);
-
   const pro = getPlan("pro")!;
   const monthly = getDisplayPrice(pro, false);
   const yearly = getDisplayPrice(pro, true);
 
-  const monthlyPrice = winback ? WINBACK_PRICE : monthly.price;
-  const yearlyPrice = winback ? WINBACK_YEARLY_PRICE : yearly.price;
+  const monthlyPrice = monthly.price;
+  const yearlyPrice = yearly.price;
   const monthlyOff = Math.round((1 - monthlyPrice / pro.monthlyPrice) * 100);
 
   const t = isAr
@@ -142,13 +132,11 @@ export default function MobilePricingScreen({
         title: "قم بالترقية إلى Megsy Pro",
         monthly: "شهرياً",
         yearly: "سنوياً",
-        introBadge: winback ? `عرض خاص لك — $${monthlyPrice}` : `خصم ${monthlyOff}% على الشهر الأول`,
-        yearlyBadge: winback ? "أفضل سعر" : "4 أشهر مجاناً",
+        introBadge: `خصم ${monthlyOff}% على الشهر الأول`,
+        yearlyBadge: "4 أشهر مجاناً",
         perMonth: "/ الشهر الأول",
         perYear: "/ سنة",
-        fine: winback
-          ? `عرض العودة: $${monthlyPrice}.00 للشهر الأول بدلاً من $${INTRO_PRICE}.00، ثم $${pro.monthlyPrice}.00/شهر. يمكنك الإلغاء في أي وقت.`
-          : `$${monthlyPrice}.00 للشهر الأول، ثم $${pro.monthlyPrice}.00/شهر. يمكنك الإلغاء في أي وقت.`,
+        fine: `$${monthlyPrice}.00 للشهر الأول، ثم $${pro.monthlyPrice}.00/شهر. يمكنك الإلغاء في أي وقت.`,
         cta: "قم بالترقية الآن",
         terms: "الشروط",
         privacy: "الخصوصية",
@@ -158,13 +146,11 @@ export default function MobilePricingScreen({
         title: "Upgrade to Megsy Pro",
         monthly: "Monthly",
         yearly: "Yearly",
-        introBadge: winback ? `Special for you — $${monthlyPrice}` : `${monthlyOff}% off the first month`,
-        yearlyBadge: winback ? "Best price" : "4 months free",
+        introBadge: `${monthlyOff}% off the first month`,
+        yearlyBadge: "4 months free",
         perMonth: "/first mo",
         perYear: "/year",
-        fine: winback
-          ? `Come-back offer: $${monthlyPrice}.00 for your first month instead of $${INTRO_PRICE}.00, then $${pro.monthlyPrice}.00/month. Cancel anytime.`
-          : `$${monthlyPrice}.00 for the first month, then $${pro.monthlyPrice}.00/month. Cancel anytime.`,
+        fine: `$${monthlyPrice}.00 for the first month, then $${pro.monthlyPrice}.00/month. Cancel anytime.`,
         cta: "Upgrade now",
         terms: "Terms",
         privacy: "Privacy",

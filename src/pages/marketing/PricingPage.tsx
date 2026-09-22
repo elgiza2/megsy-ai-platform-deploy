@@ -38,7 +38,6 @@ import {
 } from "@/data/pricingData";
 import {
   markCheckoutOpened,
-  hasAbandonedCheckout,
   INTRO_PRICE,
 } from "@/lib/pricingOffers";
 import { openCheckoutUrl } from "@/lib/openCheckout";
@@ -337,7 +336,9 @@ const PricingPage = () => {
           trial: false,
           free_trial: false,
           provider: "kashier",
-          winback: hasAbandonedCheckout(),
+          // The first-month offer is always the fixed $7 intro product.
+          // Win-back pricing is intentionally disabled for this CTA.
+          winback: false,
           method,
           display: "en",
         },

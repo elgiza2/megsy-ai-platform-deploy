@@ -72,6 +72,7 @@ const PRO_FEATURES = [
   "Deep Research with citation-backed reports",
   "Unlimited chat with every flagship model",
   "Unlimited image generation — no caps, no credits",
+  "Unlimited videos for 7 days",
   `Up to 40 premium videos a month (${PLAN_MONTHLY_CREDITS.pro} MC)`,
   "Docs, Slides & Megsy Coder — export, build and deploy",
   "Team workspace with shared projects and files",

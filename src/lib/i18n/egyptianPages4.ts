@@ -34,6 +34,7 @@ export const EGYPTIAN_PAGES_4: Record<string, string> = {
   "Unlimited chat with every flagship model": "شات بلا حدود مع كل الموديلات القوية",
   "Unlimited image generation — no caps, no credits":
     "توليد صور بلا حدود — بدون سقف وبدون كريدت",
+  "Unlimited videos for 7 days": "فيديوهات بلا حدود لمدة 7 أيام",
   "Up to 40 premium videos a month (240 MC)": "لحد 40 فيديو بريميوم في الشهر (240 كريدت)",
   "Up to 120 premium videos a month (600 MC)": "لحد 120 فيديو بريميوم في الشهر (600 كريدت)",
   "Docs, Slides & Megsy Coder — export, build and deploy":
