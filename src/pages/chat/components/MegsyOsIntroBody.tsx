@@ -76,6 +76,11 @@ export default function MegsyOsIntroBody({
     onClose();
     handleModeChange("operator");
   };
+  const closeIntro = () => {
+    try { localStorage.setItem("megsy_os_intro_seen", "1"); } catch {}
+    onClose();
+    if (typeof document !== "undefined" && document.activeElement instanceof HTMLElement) document.activeElement.blur();
+  };
 
   return (
     <>
@@ -90,7 +95,7 @@ export default function MegsyOsIntroBody({
         {/* Header */}
         <div className="shrink-0 px-4 pt-[calc(env(safe-area-inset-top)+0.875rem)] pb-4 border-b border-border/60 bg-background/95 backdrop-blur-md flex items-center gap-3">
           <button
-            onClick={() => onClose()}
+            onClick={closeIntro}
             aria-label="Back"
             className="w-10 h-10 -ml-2 rounded-full flex items-center justify-center text-foreground/90 hover:bg-accent hover:text-accent-foreground transition"
           >
@@ -146,7 +151,7 @@ export default function MegsyOsIntroBody({
         {/* Footer */}
         <div className="shrink-0 px-5 pt-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] border-t border-border/60 bg-background/95 backdrop-blur-md grid grid-cols-2 gap-3">
           <button
-            onClick={() => onClose()}
+            onClick={closeIntro}
             className="py-3.5 rounded-full bg-card/60 text-foreground border border-border/60 font-semibold text-[14px] hover:bg-accent hover:text-accent-foreground transition-all"
           >
             Maybe later
@@ -173,7 +178,7 @@ export default function MegsyOsIntroBody({
           dir="ltr"
         >
           <button
-            onClick={() => onClose()}
+            onClick={closeIntro}
             aria-label="Close"
             className="absolute top-5 right-5 z-10 w-9 h-9 rounded-full flex items-center justify-center border border-border/60 bg-card/60 text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
           >
@@ -201,7 +206,7 @@ export default function MegsyOsIntroBody({
             </p>
             <div className="mt-7 flex items-center justify-center gap-3">
               <button
-                onClick={() => onClose()}
+                onClick={closeIntro}
                 className="px-6 py-3 rounded-full text-[13.5px] font-semibold border border-border/60 bg-card/60 text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
               >
                 Maybe later

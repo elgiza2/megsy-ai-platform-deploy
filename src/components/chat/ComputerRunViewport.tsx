@@ -45,9 +45,7 @@ export default function ComputerRunViewport({
         />
       </Button>
 
-      <div
-        className={`relative w-full overflow-hidden bg-muted/20 transition-[height] duration-500 ease-out ${expanded ? "h-[min(52vh,420px)]" : "h-44"}`}
-      >
+      {expanded && <div className="relative h-[min(52vh,420px)] w-full overflow-hidden bg-muted/20">
         {url ? (
           <iframe
             src={url}
@@ -68,7 +66,7 @@ export default function ComputerRunViewport({
           </div>
         )}
         <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-foreground/[0.04]" />
-      </div>
+      </div>}
     </section>
   );
 }

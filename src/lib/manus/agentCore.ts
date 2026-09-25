@@ -306,12 +306,16 @@ export async function handleComputerAgent(payload: ComputerPayload | null): Prom
       // The upstream agent has no clock and no reporting contract of its own,
       // so both are prepended to every task.
       const nowIso = new Date().toISOString().slice(0, 10);
+      const requestedLanguage = /[\u0600-\u06ff]/.test(prompt)
+        ? "Arabic (Egyptian Arabic when natural)"
+        : "the user's original language";
       const preamble =
         `Today's date is ${nowIso} (UTC). Treat it as authoritative and never present ` +
         `older material as today's news.\n` +
         `When you finish, return a complete self-contained report of the findings ` +
         `(facts, numbers, dates, sources) as the final answer — never leave the results ` +
-        `only inside your intermediate steps.\n\n`;
+        `only inside your intermediate steps.\n` +
+        `Write that final answer in ${requestedLanguage}; do not switch to English unless the user asked in English.\n\n`;
       const fullPrompt = memory
         ? `${preamble}Context from earlier in this conversation:\n${memory}\n\n---\nTask:\n${prompt}`
         : `${preamble}Task:\n${prompt}`;
