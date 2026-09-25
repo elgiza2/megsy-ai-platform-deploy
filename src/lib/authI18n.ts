@@ -232,7 +232,7 @@ export function readStoredLang(): AuthLang | null {
   return null;
 }
 
-/** Guess the language from the browser: Arabic speakers → Egyptian Arabic. */
+/** Legacy helper retained for callers that explicitly request detection. The app never calls it automatically. */
 export function detectLang(): AuthLang {
   if (typeof navigator === "undefined") return "en";
   try {
@@ -248,7 +248,7 @@ export function detectLang(): AuthLang {
 
 let currentLang: AuthLang | null = null;
 
-/** Current effective language: stored → detected → 'en'. */
+/** Current effective language: explicit stored choice → English. */
 export function getUserLang(): AuthLang {
   if (currentLang) return currentLang;
   currentLang = readStoredLang() ?? "en";

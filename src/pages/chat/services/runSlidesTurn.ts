@@ -6,6 +6,7 @@ import { authorizePremiumSlide, FREE_PREMIUM_SLIDES_PER_DAY } from "@/lib/slides
 import type { SlideDeck } from "@/components/chat/SlidesDeckCard";
 import type { Message } from "../chatConstants";
 import { SLIDES_CLIENT_TIMEOUT_MS, SLIDES_TIMEOUT_MESSAGE } from "../chatUtils";
+import { getUserLang } from "@/lib/authI18n";
 
 export interface RunSlidesTurnArgs {
   userInput: string;
@@ -113,6 +114,21 @@ export async function runSlidesTurn(args: RunSlidesTurnArgs): Promise<void> {
     );
     return;
   }
+  const requestedNumericSlides = slidesTopic.match(/(\d{1,2})\s*(slides?|شريحة|شرائح|سلايد)/i);
+  if (requestedNumericSlides && Number(requestedNumericSlides[1]) > 12) {
+    toast.error("The current plan supports up to 12 slides. Upgrade to create a larger deck.");
+    setChatMode("normal");
+    setSearchEnabled(true);
+    setIsLoading(false);
+    setIsThinking(false);
+    resetToolUi();
+    setMessages((prev) =>
+      prev[prev.length - 1]?.role === "assistant" && !prev[prev.length - 1]?.content
+        ? prev.slice(0, -1)
+        : prev,
+    );
+    return;
+  }
 
   const conversationPromise = createOrUpdateConversation(userInput || "Slides").catch(() => null);
   const userSavePromise = conversationPromise.then(async (cid) => {
@@ -146,7 +162,7 @@ export async function runSlidesTurn(args: RunSlidesTurnArgs): Promise<void> {
     const cid = await conversationPromise;
     await userSavePromise.catch(() => {});
 
-    const isArabic = /[\u0600-\u06FF]/.test(userInput) || !!navigator?.language?.startsWith("ar");
+    const isArabic = /[\u0600-\u06FF]/.test(userInput) || getUserLang() === "ar-eg";
     let introContent = "";
 
     // ── Step 1: planning (+ imported file data) ──────────────────────────
@@ -289,7 +305,7 @@ export async function runSlidesTurn(args: RunSlidesTurnArgs): Promise<void> {
       const numeric = input.match(/(\d{1,2})\s*(slides?|شريحة|شرائح|سلايد)/i);
       if (numeric) {
         const n = parseInt(numeric[1], 10);
-        if (Number.isFinite(n) && n >= 3 && n <= 30) return n;
+        if (Number.isFinite(n) && n >= 3 && n <= 12) return n;
       }
       if (!/slides?|شريحة|شرائح|سلايد/i.test(input)) return undefined;
       // Do not use \b around Arabic words: JavaScript's word-boundary is
@@ -316,7 +332,7 @@ export async function runSlidesTurn(args: RunSlidesTurnArgs): Promise<void> {
     })();
     // An explicit "5 slides" in the request always wins: the planner's outline
     // is only a suggestion, so it must not silently override the user's number.
-    const targetCount = requestedCount || plan?.outline?.steps?.length || 10;
+    const targetCount = Math.min(12, requestedCount || plan?.outline?.steps?.length || 10);
 
 
     setSearchStatus("Writing slides");

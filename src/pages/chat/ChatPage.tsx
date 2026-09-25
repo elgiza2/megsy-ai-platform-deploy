@@ -28,6 +28,7 @@ import { warmEdgeFunctions } from "@/lib/warmEdgeFunctions";
 import AppSidebar from "@/components/layout/AppSidebar";
 import { useSidebarCollapsed } from "@/hooks/useSidebarCollapsed";
 import { isPaidUser } from "@/lib/subscriptionGating";
+import { getUserLang } from "@/lib/authI18n";
 
 // Background job helpers and one-off lib utilities that are still referenced
 // from the surviving body (cancel/cleanup paths, etc.).
@@ -1486,8 +1487,7 @@ const ChatPage = () => {
           import("@/lib/achievements"),
         ]);
         try {
-          const lang = (typeof navigator !== "undefined" && navigator.language) || "en";
-          track("message_sent", { lang: lang.split("-")[0] });
+          track("message_sent", { lang: getUserLang() === "ar-eg" ? "ar" : "en" });
         } catch {}
         try {
           if (chatMode === "images") track("image_generated");
