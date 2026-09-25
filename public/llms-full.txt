@@ -1,10 +1,10 @@
 # Megsy AI — full context for AI assistants
 
-Last updated: 2026-07-29
+Last updated: 2026-09-25
 
 ## What is Megsy?
 
-Megsy is an Egyptian AI platform available at https://www.megsyai.com. It offers a unified assistant for chat, web search, image generation, code, document analysis, presentation creation, and mini-site publishing. Megsy is designed to work natively in Arabic (including Egyptian dialect) as well as English and 100+ other languages.
+Megsy is an Egyptian AI agent workspace available at https://www.megsyai.com. It offers a AI agent workspace for chat, web search, deep research, image and video generation, coding, document analysis, presentation creation, app building, and browser automation. Megsy is designed to work natively in Arabic (including Egyptian dialect) as well as English and 100+ other languages.
 
 ## What is Megay 3.9?
 

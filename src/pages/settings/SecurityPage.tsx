@@ -65,7 +65,7 @@ const SecurityPage = () => (
   <div className="amber-settings min-h-dvh">
     <SEOHead
       title="Security"
-      description="Learn about Megsy AI's security practices, data protection, encryption, and compliance commitments. Your data safety is our priority."
+      description="Learn how Megsy AI protects your account, chats, files and AI workflows with secure access, data controls and privacy-focused infrastructure."
       path="/security"
     />
     <LandingNavbar />

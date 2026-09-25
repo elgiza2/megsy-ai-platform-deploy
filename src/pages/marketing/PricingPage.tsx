@@ -36,10 +36,7 @@ import {
   getPlan,
   type PlanTier,
 } from "@/data/pricingData";
-import {
-  markCheckoutOpened,
-  INTRO_PRICE,
-} from "@/lib/pricingOffers";
+import { markCheckoutOpened, INTRO_PRICE } from "@/lib/pricingOffers";
 import { openCheckoutUrl } from "@/lib/openCheckout";
 
 import { brandText, getZoneBrand } from "@/lib/zoneBrand";
@@ -211,7 +208,7 @@ const PricingPage = () => {
     "@type": "Product",
     name: "Megsy AI",
     description:
-      "All-in-one AI workspace — chat, image, video, slides, docs and full-stack builds on one subscription.",
+      "AI agent workspace for chat, deep research, image and video generation, presentations, documents and app building.",
     brand: { "@type": "Brand", name: "Megsy AI" },
     offers: {
       "@type": "AggregateOffer",
@@ -387,7 +384,7 @@ const PricingPage = () => {
       <>
         <SEOHead
           title={`Pricing — ${BRAND} AI Plans & Credits`}
-          description={`Simple plans for ${BRAND} AI. Chat, images, video, slides and full-stack builds — one subscription.`}
+          description={`Choose a ${BRAND} AI plan for chat, deep research, image and video generation, presentations, documents and app building.`}
           path="/pricing"
         />
         <Helmet>
@@ -432,7 +429,7 @@ const PricingPage = () => {
     <>
       <SEOHead
         title={`Pricing — ${BRAND} AI Plans & Credits`}
-        description={`Simple plans for ${BRAND} AI. Pay-as-you-go credits or monthly subscriptions for chat, images, video, slides and full-stack builds.`}
+        description={`Compare ${BRAND} AI plans for AI chat, research, image and video generation, presentations, documents and full-stack app building.`}
         path="/pricing"
       />
       <Helmet>
@@ -767,9 +764,12 @@ const PricingPage = () => {
                   </p>
 
                   <div className="mx-auto mt-6 max-w-md rounded-2xl border border-foreground/30 bg-foreground/[0.08] px-5 py-4 text-center backdrop-blur-md">
-                    <p className="text-lg font-semibold text-foreground">Megsy Pro — $7 first month</p>
+                    <p className="text-lg font-semibold text-foreground">
+                      Megsy Pro — $7 first month
+                    </p>
                     <p className="mt-1.5 text-sm leading-relaxed text-foreground/80">
-                      Start at $7 for your first month, then $20/month with unlimited premium images. Cancel anytime.
+                      Start at $7 for your first month, then $20/month with unlimited premium
+                      images. Cancel anytime.
                     </p>
                     <button
                       type="button"
@@ -777,7 +777,11 @@ const PricingPage = () => {
                       disabled={loadingTier !== null}
                       className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-foreground px-5 text-sm font-semibold text-background transition-opacity hover:opacity-90 disabled:opacity-50"
                     >
-                      {loadingTier === "pro" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Start for $7"}
+                      {loadingTier === "pro" ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Start for $7"
+                      )}
                     </button>
                   </div>
 
@@ -911,12 +915,12 @@ const PricingPage = () => {
                                   </span>
                                 </div>
 
-                                <p className="text-[11px] text-foreground/70 mt-2 tabular-nums font-light">USD</p>
+                                <p className="text-[11px] text-foreground/70 mt-2 tabular-nums font-light">
+                                  USD
+                                </p>
                               </>
                             );
                           })()}
-
-
 
                           {showTrialOffer ? (
                             <p

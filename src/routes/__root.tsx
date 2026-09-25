@@ -314,7 +314,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "theme-color", content: "#ffffff" },
       { name: "robots", content: "index, follow, max-image-preview:large" },
       { name: "format-detection", content: "telephone=no" },
-      { title: "Megsy AI — All-in-One AI Platform for Chat, Images & Video" },
+      { title: "Megsy AI — AI Agent Workspace for Chat, Research, Images & Video" },
       {
         name: "description",
         content:
@@ -322,7 +322,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         property: "og:title",
-        content: "Megsy AI — All-in-One AI Platform for Chat, Images & Video",
+        content: "Megsy AI — AI Agent Workspace for Chat, Research, Images & Video",
       },
       {
         property: "og:description",
@@ -337,7 +337,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:image", content: "https://www.megsyai.com/og-megsy.jpg" },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
-      { property: "og:image:alt", content: "Megsy AI — All-in-One AI Platform" },
+      { property: "og:image:alt", content: "Megsy AI — AI Agent Workspace" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: "https://www.megsyai.com/og-megsy.jpg" },
     ],

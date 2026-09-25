@@ -58,8 +58,8 @@ const DICT: Record<string, Entry> = {
   freeCreditsAdded: { en: "+15 free credits added — welcome to Megsy!", "ar-eg": "+15 كريدت مجاني — أهلاً بيك في Megsy!" },
 
   // ── AuthPage UI (new) ────────────────────────────────────────────────
-  seoTitle: { en: "Sign in to Megsy AI", "ar-eg": "سجّل دخولك في Megsy AI" },
-  seoDesc: { en: "Sign in or create your Megsy AI account.", "ar-eg": "سجّل دخول أو اعمل حساب في Megsy AI." },
+  seoTitle: { en: "Sign in to Megsy AI — Your AI Agent Workspace", "ar-eg": "سجّل دخولك في Megsy AI" },
+  seoDesc: { en: "Sign in or create your Megsy AI account to chat, research and create with AI.", "ar-eg": "سجّل دخول أو اعمل حساب في Megsy AI." },
   back: { en: "Back", "ar-eg": "رجوع" },
   getStarted: { en: "Get started", "ar-eg": "يلا نبدأ" },
   emailTitle: { en: "Welcome to Megsy", "ar-eg": "أهلاً بيك في Megsy" },
@@ -449,5 +449,4 @@ export function translateExactText(text: string, lang?: AuthLang): string {
     text
   );
 }
-
 

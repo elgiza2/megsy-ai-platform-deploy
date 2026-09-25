@@ -10,63 +10,63 @@ export type ChatSeoMeta = { title: string; description: string; path: string };
  */
 export const SEO_BY_MODE: Record<ChatMode, ChatSeoMeta> = {
   normal: {
-    title: "Megsy AI Chat — GPT-5.5, Claude 4.5, Gemini 3 Pro & 80+ Models",
+    title: "AI Chat with 80+ Models — Megsy AI Agent Workspace",
     description:
-      "Free AI chat with GPT-5.5, Claude 4.5, Gemini 3 Pro, Grok 4, Llama and 80+ frontier models in one place. No sign-up required to start chatting.",
+      "Chat with leading AI models, compare answers, upload files and get work done in one AI agent workspace. Start free with Megsy AI.",
     path: "/chat",
   },
   learning: {
-    title: "Learning Mode — Personal AI Tutor for Any Subject",
+    title: "AI Tutor for Any Subject — Megsy Learning Mode",
     description:
-      "Learn anything step-by-step with an AI tutor. Adaptive explanations, practice questions, study timers and music — completely free.",
+      "Learn step by step with an adaptive AI tutor, practice questions, clear explanations and study support for any subject.",
     path: "/chat?mode=learning",
   },
   shopping: {
-    title: "AI Shopping Assistant — Compare & Find Better Prices",
+    title: "AI Shopping Assistant — Compare Products and Prices",
     description:
-      "Ask anything, compare real products across stores, see live prices and find the best deal with AI shopping search.",
+      "Compare products, research options and find better prices with an AI shopping assistant that searches the web for you.",
     path: "/chat?mode=shopping",
   },
   "deep-research": {
-    title: "Deep Research — Multi-Step AI Research with Real Sources",
+    title: "Deep Research AI — Cited Reports from Real Sources",
     description:
-      "Run multi-step AI research with cited, real-time sources. Outlines, reads, summarizes and writes a full report you can export.",
+      "Run multi-source web research with citations. Megsy reads, verifies, synthesizes and writes an exportable research report.",
     path: "/chat?mode=deep-research",
   },
   slides: {
-    title: "AI Slides Generator — Beautiful Presentations from a Prompt",
+    title: "AI Presentation Maker — Create Slides from a Prompt",
     description:
-      "Generate full presentations from a single prompt. Premium templates, real research-backed content and one-click export.",
+      "Create polished presentations from a prompt with research-backed content, visual layouts and fast export.",
     path: "/chat?mode=slides",
   },
   "slides-images": {
-    title: "AI Slides with Image Generation — Visual Presentations Built by AI",
+    title: "AI Presentation Maker with Images — Visual Slides Fast",
     description:
-      "Generate slide decks where every slide ships with a custom AI-generated image. Cinematic, on-brand visuals in minutes.",
+      "Build visual slide decks with custom AI-generated images, coherent layouts and on-brand creative direction.",
     path: "/chat?mode=slides-images",
   },
   operator: {
-    title: "Megsy Operator — Autonomous Browser Agent",
+    title: "Autonomous Browser Agent — Megsy Operator",
     description:
-      "Delegate real tasks to an AI agent that browses, clicks and fills forms on your behalf — fully supervised.",
+      "Delegate browser tasks to an autonomous AI agent that can research, navigate, click and complete workflows under your supervision.",
     path: "/chat?mode=operator",
   },
   images: {
-    title: "AI Image Generation — Scene-by-Scene Visuals from Chat",
+    title: "AI Image Generator — Create and Edit Images in Chat",
     description:
-      "Describe an idea, pick a model, and the AI plans a set of cohesive shots before generating each image in chat.",
+      "Create and edit images from text in chat, with consistent scenes, creative direction and multiple AI image models.",
     path: "/chat?mode=images",
   },
   video: {
-    title: "AI Video Generation — Cinematic Shots from a Single Prompt",
+    title: "AI Video Generator — Create Cinematic Clips from Text",
     description:
-      "Describe a scene, pick a model, and the AI breaks it into shots before generating each video clip sequentially.",
+      "Turn a prompt into cinematic AI video clips with Runway-powered generation, shot planning and guided creative control.",
     path: "/chat?mode=video",
   },
   code: {
-    title: "Coder Mode — AI Pair Programmer with Live Preview",
+    title: "AI Coding Assistant — Build Apps with Live Preview",
     description:
-      "Generate React, TypeScript, HTML and Python code with an AI coder. Preview UI snippets instantly inside the chat.",
+      "Build React, TypeScript, HTML and Python projects with an AI coding assistant, live previews and practical explanations.",
     path: "/chat?mode=code",
   },
 };

@@ -113,7 +113,9 @@ export const LEGAL_DOCS: Record<string, LegalDoc> = {
         heading: "Security",
         body: [
           "Access to your data is restricted per user at the database level, transport is encrypted, and privileged operations are authorised server-side.",
-          "No system is perfectly secure. Report suspected vulnerabilities to " + SUPPORT_EMAIL + ".",
+          "No system is perfectly secure. Report suspected vulnerabilities to " +
+            SUPPORT_EMAIL +
+            ".",
         ],
       },
       {
@@ -129,8 +131,7 @@ export const LEGAL_DOCS: Record<string, LegalDoc> = {
     title: "Refund Policy",
     description:
       "How refunds, cancellations and billing issues are handled for Megsy AI subscriptions and credit purchases.",
-    intro:
-      "This page describes how cancellations and refund requests are handled.",
+    intro: "This page describes how cancellations and refund requests are handled.",
     sections: [
       {
         heading: "Cancelling a subscription",
@@ -164,9 +165,9 @@ export const LEGAL_DOCS: Record<string, LegalDoc> = {
     path: "/about",
     title: "About Megsy AI",
     description:
-      "Megsy AI is an AI workspace for chat, research, media generation, skills and connected tools.",
+      "Megsy AI is an AI agent workspace for chat, deep research, image and video generation, documents, presentations, coding and connected tools.",
     intro:
-      "Megsy AI is an AI workspace that brings chat, deep research, media generation, skills and connected tools into a single product.",
+      "Megsy AI brings chat, deep research, image and video generation, documents, presentations, coding and connected tools into one AI agent workspace.",
     sections: [
       {
         heading: "What Megsy does",
@@ -222,7 +223,11 @@ const LegalPage = ({ slug }: { slug: keyof typeof LEGAL_DOCS }) => {
 
   return (
     <>
-      <SEOHead title={doc.title} description={doc.description} path={doc.path || location.pathname} />
+      <SEOHead
+        title={doc.title}
+        description={doc.description}
+        path={doc.path || location.pathname}
+      />
       <main className="min-h-dvh bg-background text-foreground">
         <div className="mx-auto w-full max-w-3xl px-5 py-12 sm:py-16">
           <Link
@@ -254,12 +259,24 @@ const LegalPage = ({ slug }: { slug: keyof typeof LEGAL_DOCS }) => {
 
           <footer className="mt-14 border-t border-border pt-6 text-xs text-muted-foreground">
             <div className="flex flex-wrap gap-x-5 gap-y-2">
-              <Link className="hover:text-foreground" to="/terms">Terms</Link>
-              <Link className="hover:text-foreground" to="/privacy">Privacy</Link>
-              <Link className="hover:text-foreground" to="/refund">Refunds</Link>
-              <Link className="hover:text-foreground" to="/contact">Contact</Link>
-              <Link className="hover:text-foreground" to="/about">About</Link>
-              <Link className="hover:text-foreground" to="/pricing">Pricing</Link>
+              <Link className="hover:text-foreground" to="/terms">
+                Terms
+              </Link>
+              <Link className="hover:text-foreground" to="/privacy">
+                Privacy
+              </Link>
+              <Link className="hover:text-foreground" to="/refund">
+                Refunds
+              </Link>
+              <Link className="hover:text-foreground" to="/contact">
+                Contact
+              </Link>
+              <Link className="hover:text-foreground" to="/about">
+                About
+              </Link>
+              <Link className="hover:text-foreground" to="/pricing">
+                Pricing
+              </Link>
             </div>
           </footer>
         </div>
