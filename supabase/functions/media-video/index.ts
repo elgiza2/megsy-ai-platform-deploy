@@ -1,18 +1,21 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { vaultKeys, noteKeyOk, noteKeyFail } from "./_shared/keyVault.ts";
+import {
+  keySummary,
+  noteKeyAttempt,
+  noteKeyFail,
+  noteKeyOk,
+  providerError,
+  vaultKeys,
+} from "./_shared/keyVault.ts";
 
-const db = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-  { auth: { persistSession: false } },
-);
-
+const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
+  auth: { persistSession: false },
+});
 const cors = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
-
 const out = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
@@ -24,7 +27,12 @@ const rules: Record<string, Rule> = {
   "runway-gen4.5": { max: 10, resolutions: ["720p", "1080p"], durations: [5, 10], cost: 200 },
   "runway-veo-3.1": { max: 8, resolutions: ["720p", "1080p"], durations: [4, 6, 8], cost: 240 },
   "runway-seedance-2.5": { max: 5, resolutions: ["720p"], durations: [5], cost: 160 },
-  "runway-seedance-2.0-mini": { max: 10, resolutions: ["720p", "1080p"], durations: [5, 10], cost: 110 },
+  "runway-seedance-2.0-mini": {
+    max: 10,
+    resolutions: ["720p", "1080p"],
+    durations: [5, 10],
+    cost: 110,
+  },
   "runway-minimax-h3": { max: 15, resolutions: ["2k"], durations: [5, 10, 15], cost: 300 },
   "runway-gemini-omni-flash-1.1": { max: 10, resolutions: ["720p"], durations: [5, 10], cost: 180 },
 };
@@ -51,21 +59,24 @@ async function createRunwayTask(
     duration,
   };
   if (imageToVideo) body.promptImage = image;
-
   const response = await fetch(
     `https://api.dev.runwayml.com/v1/${imageToVideo ? "image_to_video" : "text_to_video"}`,
     {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "X-Runway-Version": "2024-11-06",
-      "Content-Type": "application/json",
-    },
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${key}`,
+        "X-Runway-Version": "2024-11-06",
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(body),
     },
   );
   const text = await response.text();
-  if (!response.ok) throw new Error(`Runway ${response.status}: ${text.slice(0, 240)}`);
+  if (!response.ok) {
+    const error = new Error(providerError(response.status, text));
+    (error as any).providerStatus = response.status;
+    throw error;
+  }
   const result = JSON.parse(text);
   const id = result.id ?? result.task_id;
   if (!id) throw new Error("Runway returned no task id");
@@ -74,7 +85,6 @@ async function createRunwayTask(
 
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers: cors });
-
   let body: Record<string, unknown> = {};
   try {
     body = await request.json();
@@ -85,14 +95,14 @@ Deno.serve(async (request) => {
   const token = (request.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
   const { data: authData } = token
     ? await db.auth.getUser(token)
-    : { data: { user: null } } as any;
+    : ({ data: { user: null } } as any);
   const user = authData?.user;
-  if (!user) return out({ error: true, paywall: true, message: "Sign in to generate videos." }, 401);
+  if (!user)
+    return out({ error: true, paywall: true, message: "Sign in to generate videos." }, 401);
 
   const model = String(body.model_slug || "runway-gen4.5");
   const rule = rules[model];
   if (!rule) return out({ error: true, message: "Choose a supported Runway video model." }, 400);
-
   const duration = Number(body.duration || rule.durations[0]);
   const resolution = String(body.resolution || rule.resolutions[0]).toLowerCase();
   if (
@@ -108,32 +118,33 @@ Deno.serve(async (request) => {
       400,
     );
   }
-
   const prompt = String(body.prompt || "").trim();
   if (!prompt) return out({ error: true, message: "prompt is required" }, 400);
 
-  // Check provider availability before charging the user.
+  // Snapshot the full encrypted + legacy pool. Depleted keys are removed from
+  // future snapshots, while rate-limited keys are temporarily cooled down.
   const keys = await vaultKeys("runway");
-  if (!keys.length) {
-    return out({ error: true, message: "No Runway key is configured. Add one from the Telegram admin bot." }, 503);
-  }
+  if (!keys.length)
+    return out({ error: true, message: "No active Runway keys are configured." }, 503);
 
   const quota = await db.rpc("consume_video_quota", {
     _model: model,
     _unlimited: false,
     _user_id: user.id,
   });
-  if (quota.error || !quota.data?.allowed) {
+  if (quota.error || !quota.data?.allowed)
     return out(
       {
         error: true,
         paywall: true,
-        message: quota.data?.message || quota.data?.error || quota.error?.message || "Video credits required.",
+        message:
+          quota.data?.message ||
+          quota.data?.error ||
+          quota.error?.message ||
+          "Video credits required.",
       },
       402,
     );
-  }
-
   const cost = Number(quota.data.cost || rule.cost);
   const spent = await db.rpc("spend_credits_auto", {
     p_user_id: user.id,
@@ -141,49 +152,81 @@ Deno.serve(async (request) => {
     p_action_type: "video_generation",
     p_description: `${model} ${duration}s`,
   });
-  if (spent.error || spent.data?.success === false) {
-    return out({ error: true, paywall: true, message: spent.data?.error || "Insufficient credits." }, 402);
+  if (spent.error || spent.data?.success === false)
+    return out(
+      { error: true, paywall: true, message: spent.data?.error || "Insufficient credits." },
+      402,
+    );
+
+  let lastError = "Runway request failed";
+  let selectedKey = keys[0];
+  let generationId: string | null = null;
+  for (const key of keys) {
+    selectedKey = key;
+    await noteKeyAttempt(key);
+    try {
+      generationId = await createRunwayTask(
+        key.key,
+        model,
+        prompt,
+        typeof body.start_frame === "string" ? body.start_frame : undefined,
+        duration,
+        typeof body.aspect_ratio === "string" ? body.aspect_ratio : undefined,
+      );
+      await noteKeyOk(key);
+      break;
+    } catch (error) {
+      lastError = error instanceof Error ? error.message : "Runway request failed";
+      const status = Number((error as any)?.providerStatus || 500);
+      await noteKeyFail(key, lastError, status);
+      // A depleted/limited key is not allowed to consume the user's request:
+      // move immediately to the next key in the same pool snapshot.
+      continue;
+    }
   }
 
-  const key = keys[0];
-  try {
-    const generationId = await createRunwayTask(
-      key.key,
-      model,
-      prompt,
-      typeof body.start_frame === "string" ? body.start_frame : undefined,
-      duration,
-      typeof body.aspect_ratio === "string" ? body.aspect_ratio : undefined,
-    );
-    const { data: job, error: jobError } = await db
-      .from("pending_video_jobs")
-      .insert({
-        user_id: user.id,
-        provider: "runway",
-        model_slug: model,
-        generation_id: generationId,
-        api_key_id: key.id,
-        credits_charged: cost,
-        prompt,
-        duration_seconds: duration,
-        resolution,
-        status: "pending",
-      })
-      .select("id")
-      .single();
-    if (jobError) throw new Error(jobError.message);
-    await noteKeyOk(key.id);
-    return out({ job_id: job.id, provider: "runway", model_slug: model, credits_charged: cost });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Runway request failed";
-    await noteKeyFail(key.id, message);
-    // Never charge for a provider request that did not create a trackable job.
+  if (!generationId) {
     await db.rpc("grant_user_credits", {
       p_user_id: user.id,
       p_amount: cost,
       p_action_type: "video_generation_refund",
       p_description: `Refund for failed ${model} request`,
     });
-    return out({ error: true, message }, 502);
+    return out({ error: true, message: lastError, attempted_keys: keys.length }, 502);
   }
+
+  const { data: job, error: jobError } = await db
+    .from("pending_video_jobs")
+    .insert({
+      user_id: user.id,
+      provider: "runway",
+      model_slug: model,
+      generation_id: generationId,
+      api_key_id: selectedKey.id,
+      credits_charged: cost,
+      prompt,
+      duration_seconds: duration,
+      resolution,
+      status: "pending",
+    })
+    .select("id")
+    .single();
+  if (jobError) {
+    await db.rpc("grant_user_credits", {
+      p_user_id: user.id,
+      p_amount: cost,
+      p_action_type: "video_generation_refund",
+      p_description: `Refund for untracked ${model} request`,
+    });
+    return out({ error: true, message: jobError.message }, 502);
+  }
+
+  return out({
+    job_id: job.id,
+    provider: "runway",
+    model_slug: model,
+    credits_charged: cost,
+    key: keySummary(selectedKey),
+    attempted_keys: keys.length,
+  });
 });

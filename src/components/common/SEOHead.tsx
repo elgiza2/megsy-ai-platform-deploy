@@ -14,7 +14,9 @@ interface SEOHeadProps {
   emitLandingAlternates?: boolean;
 }
 
-const SITE_URL = "https://megsyai.com";
+// The apex domain permanently redirects to www. Canonicals and alternates must
+// use the final 200 URL so Google sees a canonical/redirect match.
+const SITE_URL = "https://www.megsyai.com";
 const DEFAULT_IMAGE =
   "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/fae3cd77-3f99-4a10-8225-ba5e64510390/id-preview-b1f21eef--70a3240c-12ec-46ff-99ea-54f772181a95.lovable.app-1772787005803.png";
 
@@ -47,7 +49,9 @@ const SEOHead = ({
   const effectiveLang = (meta?.code ?? savedLang) as AuthLang | undefined;
 
   const localizedTitle = effectiveLang ? translateExactText(title, effectiveLang) : title;
-  const localizedDescription = effectiveLang ? translateExactText(description, effectiveLang) : description;
+  const localizedDescription = effectiveLang
+    ? translateExactText(description, effectiveLang)
+    : description;
   const localizedFullTitle = isHomePath ? localizedTitle : `${localizedTitle} | ${brandName}`;
 
   return (
@@ -66,6 +70,7 @@ const SEOHead = ({
       <meta property="og:image" content={ogImage} />
       <meta property="og:site_name" content={brandName} />
       <meta property="og:locale" content={ogLocale} />
+      {meta?.code !== "en" && <meta property="og:locale:alternate" content="en_US" />}
 
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:site" content={twitterHandle} />

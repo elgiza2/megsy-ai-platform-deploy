@@ -62,8 +62,13 @@ async function requestImage(
   aspectRatio?: string,
 ): Promise<string> {
   const routerModelSlug = modelSlug === "gen4_image_turbo" ? "runway-gen4-image-turbo" : modelSlug;
-  if (/runway[-_]gen4[-_]image[-_]turbo|^gen4_image_turbo$/i.test(routerModelSlug) && refs.length === 0) {
-    throw new Error("Runway Gen-4 Image Turbo requires a reference image. Attach an image and try again.");
+  if (
+    /runway[-_]gen4[-_]image[-_]turbo|^gen4_image_turbo$/i.test(routerModelSlug) &&
+    refs.length === 0
+  ) {
+    throw new Error(
+      "Runway Gen-4 Image Turbo requires a reference image. Attach an image and try again.",
+    );
   }
   const { data, error } = await supabase.functions.invoke(IMAGE_FN, {
     body: {
@@ -85,7 +90,16 @@ async function requestImage(
         : {}),
     },
   });
-  if (error) throw new Error(error.message || "image gen failed");
+  if (error) {
+    let detail = error.message || "image gen failed";
+    try {
+      const payload = await (error as any).context?.clone?.().json?.();
+      detail = payload?.message || payload?.error || detail;
+    } catch {
+      // FunctionsHttpError.context is not present in older supabase-js builds.
+    }
+    throw new Error(detail);
+  }
   if (data?.paywall) {
     const e = new Error(data.message || "Upgrade required");
     (e as any).paywall = true;
@@ -204,7 +218,16 @@ async function generateVideoScene(
 
   try {
     const { data, error } = await supabase.functions.invoke("media-video", { body });
-    if (error) throw new Error(error.message || "video gen failed");
+    if (error) {
+      let detail = error.message || "video gen failed";
+      try {
+        const payload = await (error as any).context?.clone?.().json?.();
+        detail = payload?.message || payload?.error || detail;
+      } catch {
+        // FunctionsHttpError.context is not present in older supabase-js builds.
+      }
+      throw new Error(detail);
+    }
     if (data?.paywall) throw new Error(data.message || "Upgrade required");
     if (data?.error) throw new Error(data.message || data.error);
 

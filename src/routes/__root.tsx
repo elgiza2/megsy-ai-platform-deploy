@@ -199,13 +199,43 @@ const SPECULATION_SCRIPT = `(function () {
 
 const ORG_JSON_LD = JSON.stringify({
   "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "Megsy AI",
-  url: "https://megsyai.com/",
-  logo: "https://megsyai.com/app-icon-512.png",
-  sameAs: ["https://x.com/megsyai", "https://www.instagram.com/megsyai"],
-  description:
-    "All-in-one AI platform for chat, images, video, slides, docs and apps — every top model in one place.",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://www.megsyai.com/#organization",
+      name: "Megsy AI",
+      url: "https://www.megsyai.com/",
+      logo: "https://www.megsyai.com/app-icon-512.png",
+      sameAs: ["https://x.com/megsyai", "https://www.instagram.com/megsyai"],
+      description:
+        "AI agent workspace for chat, image and video generation, research, documents, slides and app building.",
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.megsyai.com/#website",
+      name: "Megsy AI",
+      url: "https://www.megsyai.com/",
+      publisher: { "@id": "https://www.megsyai.com/#organization" },
+      inLanguage: ["en", "ar"],
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://www.megsyai.com/#software",
+      name: "Megsy AI",
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web",
+      url: "https://www.megsyai.com/",
+      description:
+        "One AI agent workspace to chat, research, generate images and videos, create slides and documents, and build apps.",
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "USD",
+        availability: "https://schema.org/InStock",
+      },
+      publisher: { "@id": "https://www.megsyai.com/#organization" },
+    },
+  ],
 });
 
 function NotFoundComponent() {
@@ -218,7 +248,10 @@ function NotFoundComponent() {
           The page you're looking for doesn't exist or has been moved.
         </p>
         <div className="mt-6">
-          <Link to="/" className="inline-flex items-center justify-center rounded-md border px-4 py-2 text-sm font-medium">
+          <Link
+            to="/"
+            className="inline-flex items-center justify-center rounded-md border px-4 py-2 text-sm font-medium"
+          >
             Go home
           </Link>
         </div>
@@ -285,25 +318,28 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "Chat, generate images, create videos, build slides, docs and full apps — one AI platform with every top model. Free to start.",
+          "Megsy AI is an all-in-one AI agent workspace for chat, research, image and video generation, slides, documents and app building. Free to start.",
       },
-      { property: "og:title", content: "Megsy AI — All-in-One AI Platform for Chat, Images & Video" },
+      {
+        property: "og:title",
+        content: "Megsy AI — All-in-One AI Platform for Chat, Images & Video",
+      },
       {
         property: "og:description",
         content:
-          "Chat, generate images, create videos, build slides, docs and full apps — one AI platform with every top model. Free to start.",
+          "Megsy AI is an all-in-one AI agent workspace for chat, research, image and video generation, slides, documents and app building. Free to start.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://megsyai.com/" },
+      { property: "og:url", content: "https://www.megsyai.com/" },
       { property: "og:site_name", content: "Megsy AI" },
       { property: "og:locale", content: "en_US" },
       { property: "og:locale:alternate", content: "ar_EG" },
-      { property: "og:image", content: "https://megsyai.com/og-megsy.jpg" },
+      { property: "og:image", content: "https://www.megsyai.com/og-megsy.jpg" },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
       { property: "og:image:alt", content: "Megsy AI — All-in-One AI Platform" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: "https://megsyai.com/og-megsy.jpg" },
+      { name: "twitter:image", content: "https://www.megsyai.com/og-megsy.jpg" },
     ],
     links: [
       { rel: "icon", type: "image/png", sizes: "32x32", href: "/app-icon-32.png" },
@@ -313,7 +349,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "manifest", href: "/site.webmanifest" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "preconnect", href: "https://qdnqxjzjecaieuavagvq.supabase.co", crossOrigin: "anonymous" },
+      {
+        rel: "preconnect",
+        href: "https://qdnqxjzjecaieuavagvq.supabase.co",
+        crossOrigin: "anonymous",
+      },
       { rel: "dns-prefetch", href: "https://qdnqxjzjecaieuavagvq.supabase.co" },
       { rel: "preconnect", href: "https://d8j0ntlcm91z4.cloudfront.net", crossOrigin: "anonymous" },
       { rel: "dns-prefetch", href: "https://d8j0ntlcm91z4.cloudfront.net" },
@@ -392,7 +432,6 @@ const ADROLL_SCRIPT = `
 })();
 `;
 
-
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en" dir="ltr" className="dark" translate="no" suppressHydrationWarning>
@@ -426,9 +465,7 @@ function RootShell({ children }: { children: ReactNode }) {
             </filter>
           </defs>
         </svg>
-        <div id="root">
-          {children}
-        </div>
+        <div id="root">{children}</div>
         <script dangerouslySetInnerHTML={{ __html: SNAPSHOT_RESTORE_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: SPECULATION_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: ADROLL_SCRIPT }} />
