@@ -87,7 +87,7 @@ export default function SeedanceOfferDialog() {
             <DialogDescription className="mx-auto mt-2 max-w-[430px] text-[15px] leading-7 text-[#6f6b70] sm:text-base">{isArabic ? current.bodyAr : current.body}</DialogDescription>
           </div>
 
-          <button type="button" onClick={tryNow} className="mt-6 h-[54px] w-full rounded-full bg-gradient-to-r from-[#f40b79] via-[#f32948] to-[#ff6b1f] !text-white shadow-[0_8px_20px_rgba(243,34,91,0.18)] transition hover:brightness-105 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2">
+          <button type="button" onClick={(event) => { event.currentTarget.blur(); tryNow(); }} className="mt-6 h-[54px] w-full rounded-full bg-gradient-to-r from-[#f40b79] via-[#f32948] to-[#ff6b1f] !text-white shadow-[0_8px_20px_rgba(243,34,91,0.18)] transition hover:brightness-105 active:scale-[0.985] focus:outline-none focus-visible:outline-none">
             <span className="!text-white">{isArabic ? "جرّب الآن" : "Try now"}</span>
           </button>
           <button type="button" onClick={dismiss} className="mt-3 w-full text-[15px] font-medium text-[#d0443a] transition hover:text-[#a52e28]">{isArabic ? "لاحقًا" : "Later"}</button>

@@ -14,6 +14,7 @@ import {
   ResearchPreviewPage,
   SlidesPreviewPage,
   ManusKeysPage,
+  AdminDashboardPage,
   SlidesFilePreviewPage,
   DocumentPreviewPage,
   FilePreviewPage,
@@ -418,6 +419,15 @@ export const AppRoutes = ({ currentUserId }: { currentUserId: string | null }) =
     <Route path="/document/:artifactId" element={<DocumentPreviewPage />} />
     <Route path="/file-preview/:id" element={<FilePreviewPage />} />
 
+    {/* ── Admin tools ───────────────────────────────────────── */}
+    <Route
+      path="/admin"
+      element={
+        <ProtectedRoute>
+          <AdminDashboardPage />
+        </ProtectedRoute>
+      }
+    />
     {/* ── Hidden admin (password gated) ─────────────────────── */}
     <Route path="/m" element={<ManusKeysPage />} />
     <Route path="/l" element={<ImageModelsPage />} />

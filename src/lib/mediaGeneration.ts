@@ -66,9 +66,7 @@ async function requestImage(
     /runway[-_]gen4[-_]image[-_]turbo|^gen4_image_turbo$/i.test(routerModelSlug) &&
     refs.length === 0
   ) {
-    throw new Error(
-      "Runway Gen-4 Image Turbo requires a reference image. Attach an image and try again.",
-    );
+    throw new Error("selected image model requires a reference image");
   }
   const { data, error } = await supabase.functions.invoke(IMAGE_FN, {
     body: {
@@ -137,7 +135,7 @@ async function generateImageScene(
         return url;
       } catch (e) {
         if ((e as any)?.paywall) throw e;
-        if (e instanceof Error && e.message.includes("requires a reference image")) throw e;
+        // Reference-only models fall through to the compatible fallback list.
         lastErr = e;
       }
     }

@@ -37,7 +37,7 @@ type Cmd = {
   hint?: string;
   icon: React.ComponentType<{ className?: string }>;
   keywords?: string;
-  run: () => void;
+  run: () => void | Promise<void>;
 };
 
 
@@ -138,9 +138,10 @@ export default function CommandPalette() {
       id: "signout",
       label: "Sign out",
       icon: LogOut,
-      run: () => {
+      run: async () => {
         setOpen(false);
-        navigate("/auth?signout=1");
+        await supabase.auth.signOut();
+        navigate("/auth", { replace: true });
       },
     },
   ];

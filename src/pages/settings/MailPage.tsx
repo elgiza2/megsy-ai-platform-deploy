@@ -527,10 +527,10 @@ export default function MailPage() {
   return (
     <div className="flex h-[100dvh] w-full overflow-hidden bg-background text-foreground">
       <aside
-        style={{ width: sidebarWidth, minWidth: sidebarWidth, flexBasis: sidebarWidth }}
+        style={{ width: 260, minWidth: 260, flexBasis: 260 }}
         className="relative z-40 hidden shrink-0 overflow-hidden transition-[width,min-width,flex-basis] duration-300 md:flex"
       >
-        <AppSidebar open inline onClose={() => {}} onNewChat={() => navigate("/")} />
+        <AppSidebar open inline forceExpanded onClose={() => {}} onNewChat={() => navigate("/")} />
       </aside>
       <main className="min-w-0 flex-1 overflow-y-auto bg-background">
         <div className="mx-auto w-full max-w-2xl px-5 py-7">

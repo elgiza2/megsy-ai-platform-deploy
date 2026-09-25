@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Download, ArrowLeft, Loader2, Share2, RectangleVertical, RectangleHorizontal } from "lucide-react";
 import { toast } from "sonner";
-import slidesCardCover from "@/assets/slides-card-cover.png";
 import { stashSlidesFileForPreview } from "@/lib/slidesFilePreviewStore";
 
 const MEGSY_INVITE = "This presentation was designed with Megsy — try it free: https://megsy.ai";
@@ -60,31 +59,25 @@ interface Props {
   chatName?: string;
 }
 
-const OilPreviewArtwork = ({ title }: Pick<Props, "title">) => {
-  // Fixed olive-oil palette — gradient of pure & deep olives.
-  const oliveDeep = "#3a3a18"; // زيتي غامق
-  const oliveDark = "#55611f"; // زيتي صافي غامق
-  const olive = "#7a8a2e"; // زيتي صافي
-  const oliveSoft = "#a8b75a"; // زيتي فاتح
-  const oliveCream = "#d9d79a"; // كريمي زيتي
+const OilPreviewArtwork = ({ title, colors }: Pick<Props, "title" | "colors">) => {
+  const [first, second] = colors?.length === 2 ? colors : ["#303044", "#7c3aed"];
 
   return (
     <div
       aria-label={title}
       className="absolute inset-0 overflow-hidden"
       style={{
-        background: `linear-gradient(135deg, ${oliveDeep} 0%, ${oliveDark} 40%, ${olive} 100%)`,
+        background: `linear-gradient(135deg, ${first} 0%, ${second} 100%)`,
       }}
     >
       <div
         className="absolute inset-[-12%] opacity-95"
         style={{
           background: `
-            radial-gradient(circle at 18% 24%, ${oliveCream} 0%, transparent 28%),
-            radial-gradient(circle at 78% 22%, ${oliveSoft} 0%, transparent 30%),
-            radial-gradient(circle at 68% 72%, ${oliveDeep} 0%, transparent 34%),
-            radial-gradient(circle at 24% 78%, ${olive} 0%, transparent 32%),
-            linear-gradient(140deg, ${oliveDark} 0%, ${olive} 52%, ${oliveDeep} 100%)
+            radial-gradient(circle at 18% 24%, #ffffff88 0%, transparent 28%),
+            radial-gradient(circle at 78% 22%, #ffffff44 0%, transparent 30%),
+            radial-gradient(circle at 68% 72%, #00000055 0%, transparent 34%),
+            linear-gradient(140deg, ${first} 0%, ${second} 100%)
           `,
           filter: "blur(9px) saturate(1.2)",
           transform: "scale(1.08)",
@@ -94,11 +87,11 @@ const OilPreviewArtwork = ({ title }: Pick<Props, "title">) => {
         className="absolute inset-0 opacity-55 mix-blend-soft-light"
         style={{
           background: `repeating-linear-gradient(118deg,
-            ${oliveCream}55 0px,
-            ${oliveCream}55 10px,
+            #ffffff33 0px,
+            #ffffff33 10px,
             transparent 24px,
-            ${oliveDeep}40 38px,
-            ${oliveDeep}40 52px
+            #00000022 38px,
+            #00000022 52px
           )`,
         }}
       />
@@ -106,8 +99,8 @@ const OilPreviewArtwork = ({ title }: Pick<Props, "title">) => {
         className="absolute inset-0 opacity-45"
         style={{
           background: `
-            linear-gradient(90deg, ${oliveCream}22 0%, transparent 18%, transparent 82%, ${oliveDeep}30 100%),
-            linear-gradient(180deg, ${oliveSoft}26 0%, transparent 24%, transparent 76%, ${oliveDeep}40 100%)
+            linear-gradient(90deg, #ffffff22 0%, transparent 18%, transparent 82%, #00000030 100%),
+            linear-gradient(180deg, #ffffff26 0%, transparent 24%, transparent 76%, #00000040 100%)
           `,
         }}
       />
@@ -129,12 +122,8 @@ const StandardSlidesCard = ({ title, url, colors, chatName }: Props) => {
         onClick={openPreview}
         className="slides-card-preview relative block w-full aspect-[16/9] overflow-hidden cursor-pointer group/preview"
       >
-        <img loading="lazy" decoding="async"
-          src={slidesCardCover}
-          alt={title}
-          className="w-full h-full object-cover"
-          draggable={false}
-        />
+        <OilPreviewArtwork title={title} colors={colors} />
+        <div className="absolute inset-x-5 bottom-5 max-w-[80%] text-left text-xl font-semibold leading-tight text-white drop-shadow-md">{title}</div>
       </button>
 
       <div className="slides-card-actions px-4 pb-4 pt-4 flex gap-2">

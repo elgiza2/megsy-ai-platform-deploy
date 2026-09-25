@@ -23,20 +23,20 @@ export default function ComputerRunViewport({
   return (
     <section
       data-computer-viewport
-      className="relative w-full overflow-hidden rounded-3xl border border-border/40 bg-card/40 shadow-sm"
+      className={`relative overflow-hidden rounded-2xl border border-border/40 bg-card/40 shadow-sm transition-all duration-200 ${expanded ? "w-full" : "w-fit"}`}
       aria-label="كومبيوتر ميغسي"
     >
       <Button
         type="button"
         onClick={() => setExpanded((value) => !value)}
         variant="ghost"
-        className="flex h-9 w-full items-center gap-2 rounded-none border-b border-border/30 px-3 text-start shadow-none hover:bg-foreground/[0.03]"
+        className={`flex h-9 items-center gap-2 rounded-2xl border-0 px-3 text-start shadow-none hover:bg-foreground/[0.05] ${expanded ? "w-full rounded-b-none border-b" : "w-10 justify-center px-0"}`}
         aria-expanded={expanded}
       >
         <MegsyStar
           className={`h-3.5 w-3.5 shrink-0 text-[var(--megsy-gold)] ${active ? "motion-safe:animate-[spin_4s_linear_infinite]" : ""}`}
         />
-        <span className="min-w-0 flex-1 truncate text-[11px] font-medium text-muted-foreground">
+        <span className={`${expanded ? "min-w-0 flex-1" : "sr-only"} truncate text-[11px] font-medium text-muted-foreground`}>
           {status || (active ? (isArabic ? "كمبيوتر ميغسي يعمل الآن" : "Megsy computer is working") : isArabic ? "كمبيوتر ميغسي" : "Megsy computer")}
         </span>
         <ChevronDown

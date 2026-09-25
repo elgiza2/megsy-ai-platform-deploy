@@ -856,10 +856,13 @@ export function buildCustomSystem(
   if (chatMode !== "learning" && chatMode !== "code" && !parts[0]?.startsWith("You are MEGSY, an elite"))
     parts.push(DEPTH_RULE);
 
+  parts.push(
+    "FINAL LANGUAGE RULE: After any tool, computer, research, or specialist-agent work, translate and rewrite the final answer in the same language as the latest user message. Never switch to English merely because an internal agent or tool answered in English. Preserve names, URLs, code, and factual meaning while translating the surrounding explanation.",
+  );
+
   // Identity and product knowledge are appended to EVERY mode so the assistant
   // never improvises about the company, the founder, or what the site offers.
   parts.push(megsyKnowledgeBlock());
 
   return parts.join("\n\n");
 }
-
