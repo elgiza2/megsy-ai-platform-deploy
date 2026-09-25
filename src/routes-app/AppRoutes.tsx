@@ -16,6 +16,7 @@ import {
   ManusKeysPage,
   SlidesFilePreviewPage,
   DocumentPreviewPage,
+  FilePreviewPage,
   // auth hub
   AuthPage,
   OAuthCallbackPage,
@@ -415,6 +416,7 @@ export const AppRoutes = ({ currentUserId }: { currentUserId: string | null }) =
     <Route path="/slides/preview/:id" element={<SlidesPreviewPage />} />
     <Route path="/slides/file-preview/:id" element={<SlidesFilePreviewPage />} />
     <Route path="/document/:artifactId" element={<DocumentPreviewPage />} />
+    <Route path="/file-preview/:id" element={<FilePreviewPage />} />
 
     {/* ── Hidden admin (password gated) ─────────────────────── */}
     <Route path="/m" element={<ManusKeysPage />} />

@@ -85,6 +85,7 @@ export const SplashTestPage = lazy(() => import("@/pages/test/SplashTestPage"));
 export const SlidesPreviewPage = lazy(() => import("@/pages/SlidesPreviewPage"));
 export const SlidesFilePreviewPage = lazy(() => import("@/pages/SlidesFilePreviewPage"));
 export const DocumentPreviewPage = lazy(() => import("@/pages/DocumentPreviewPage"));
+export const FilePreviewPage = lazy(() => import("@/pages/FilePreviewPage"));
 export const KnowledgePage = lazy(() => import("@/pages/settings/KnowledgePage"));
 
 /* ── Hidden admin ─────────────────────────────────────────────── */

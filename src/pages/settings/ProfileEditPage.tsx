@@ -168,10 +168,14 @@ const ProfileEditPage = () => {
   };
 
   const handleLogout = async () => {
+    if (loggingOut) return;
     setLoggingOut(true);
     try {
-      await supabase.auth.signOut();
-      navigate("/auth");
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      navigate("/auth", { replace: true });
+    } catch (err) {
+      toast.error(sanitizeErrorMessage(err, "Could not sign out. Please try again."));
     } finally {
       setLoggingOut(false);
       setLogoutOpen(false);

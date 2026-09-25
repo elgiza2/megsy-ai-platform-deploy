@@ -157,7 +157,7 @@ const UI_DICT: Record<string, Entry> = {
   getPlus: { en: "Get Plus", "ar-eg": "هات بلس" },
   placeholderAsk: { en: "Ask Megsy anything…", "ar-eg": "اسأل Megsy أي حاجة…" },
   placeholderProject: { en: "Start your next project with one idea…", "ar-eg": "ابدأ مشروعك الجاي بفكرة واحدة…" },
-  greeting1: { en: "Let's cook something up.", "ar-eg": "يلا نعمل حاجة حلوة." },
+  greeting1: { en: "What are you building today?", "ar-eg": "هنبني إيه النهارده؟" },
   greeting2: { en: "What should we build today?", "ar-eg": "نبني إيه النهارده؟" },
   greeting3: { en: "Drop an idea and I'll run with it.", "ar-eg": "قول فكرة وأنا أكمّل." },
   greeting4: { en: "Start with a thought. I'll shape it.", "ar-eg": "ابدأ بفكرة وأنا أظبطها." },
@@ -449,4 +449,3 @@ export function translateExactText(text: string, lang?: AuthLang): string {
     text
   );
 }
-

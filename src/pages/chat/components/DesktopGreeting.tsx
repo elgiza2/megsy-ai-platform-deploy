@@ -11,7 +11,7 @@ interface DesktopGreetingProps {
 
 // Keys resolved through the shared UI dictionary so the hero line follows the
 // user's language instead of always rendering English.
-const entryTaglineKeys = ["greeting1", "greeting2", "greeting3", "greeting4", "greeting5"];
+const entryTaglineKeys = ["greeting1"];
 
 /**
  * Chat empty-state greeting. The line changes once per page entry and then
@@ -60,7 +60,7 @@ export const DesktopGreeting = (_: DesktopGreetingProps) => {
           >
             <h1
               data-greeting
-              className="max-w-3xl text-center text-[24px] font-normal leading-snug tracking-[-0.01em] text-foreground md:text-[30px] lg:text-[34px]"
+              className="font-display max-w-3xl text-center text-[24px] font-medium leading-snug tracking-[-0.02em] text-foreground md:text-[30px] lg:text-[34px]"
             >
               {tagline}
             </h1>

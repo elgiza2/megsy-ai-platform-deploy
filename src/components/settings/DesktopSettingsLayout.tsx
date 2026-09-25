@@ -4,6 +4,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, Monitor, PanelLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { sanitizeErrorMessage } from "@/lib/sanitizeError";
 import { useConfirm } from "@/components/common/ConfirmDialog";
 import AppLayout from "@/layouts/AppLayout";
 import { useSettingsShell } from "@/components/settings/SettingsShell";
@@ -95,8 +97,13 @@ export function DesktopSettingsLayout({
       confirmLabel: "Log out",
     });
     if (!ok) return;
-    await supabase.auth.signOut();
-    go("/auth");
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      navigate("/auth", { replace: true });
+    } catch (err) {
+      toast.error(sanitizeErrorMessage(err, "Could not sign out. Please try again."));
+    }
   };
 
   const isActive = (path: string) => {
@@ -128,7 +135,7 @@ export function DesktopSettingsLayout({
         data-settings-page
         data-settings-home={isSettingsHome ? "true" : undefined}
         className={cn(
-          "settings-desktop-canvas relative h-full w-full overflow-hidden antialiased text-foreground",
+          "settings-desktop-canvas relative h-[100dvh] min-h-[100dvh] w-full overflow-hidden antialiased text-foreground",
           "bg-transparent"
         )}
       >
@@ -136,10 +143,10 @@ export function DesktopSettingsLayout({
           <div className="absolute inset-0 settings-canvas-bg" />
         </div>
 
-        <div className="relative z-10 h-full w-full flex">
+        <div className="relative z-10 h-full min-h-0 w-full flex">
           <aside
             data-app-sidebar="true"
-            className="theme-fixed relative z-40 hidden md:flex shrink-0 overflow-hidden border-e border-transparent"
+            className="theme-fixed relative z-40 hidden min-h-0 md:flex shrink-0 overflow-hidden border-e border-transparent"
             style={{ width: 260, minWidth: 260, flexBasis: 260, backgroundColor: "transparent" }}
           >
             <AppSidebar
@@ -155,7 +162,7 @@ export function DesktopSettingsLayout({
           </aside>
 
           {/* Main */}
-          <div className="flex-1 overflow-y-auto bg-transparent">
+          <div className="min-h-0 flex-1 overflow-y-auto bg-transparent">
             <div className="mx-auto max-w-6xl px-10 py-10 xl:px-12">
               <div className="settings-desktop-content pb-24 text-foreground">{children}</div>
             </div>
