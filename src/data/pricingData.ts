@@ -313,7 +313,7 @@ export const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Is my payment secure? Which payment methods do you accept?",
-    a: 'All payments are processed by Dodo Payments, a PCI-DSS Level 1 merchant of record. Your card details never touch our servers. We accept Visa, Mastercard, American Express, JCB, UnionPay, Apple Pay, Google Pay, Amazon Pay and WeChat Pay, with 3-D Secure 2 on eligible transactions. Your statement will show "DODO * MEGSY AI".',
+    a: "All Megsy subscription payments are processed through Kashier. Your card details never touch our servers. Kashier supports card and mobile-wallet payment methods available in your checkout.",
   },
   {
     q: "Do you offer team or enterprise plans?",

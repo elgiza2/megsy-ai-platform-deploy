@@ -62,8 +62,8 @@
 - Contact shown: support@megsyai.com and +20 109 882 1812
 - Two paid plans: Pro and Max (no free card shown on pricing page)
 - Yearly billing toggle: 4 months free (yearly = 8 × monthly)
-- Payment processor: **Dodo Payments** (PCI-DSS Level 1 merchant of record)
-- Bank statement descriptor: "DODO * MEGSY AI"
+- Payment processor: **Kashier** (the only Megsy subscription checkout)
+- Checkout methods: Kashier-hosted card and mobile-wallet options shown at checkout
 - Prices shown ex. tax; VAT/GST added at checkout
 
 #### Plan Details (monthly / yearly)
@@ -109,7 +109,7 @@
 - FAQ: What happens when I run out of MC? → Chat is always unlimited. Images/Slides/Docs/Research/Code Builder are available inside the plan window (7 days Pro, 15 days Elite, all month Business). MC is required for video and usage outside plan windows. Can top up anytime.
 - FAQ: What's the difference between unlimited window and MC? → Unlimited window covers Images, Slides, Docs, Deep Research, Code Builder. Chat always unlimited. Video is always credit-based (MC).
 - FAQ: Do unused credits roll over? → No. MC reset each billing cycle. Yearly plans get bonus MC upfront.
-- FAQ: Is my payment secure? → Dodo Payments, bank-grade encryption. Megsy never stores card details.
+- FAQ: Is my payment secure? → Kashier-hosted checkout. Megsy never stores card details.
 - FAQ: Do you offer team or enterprise plans? → Business has unlimited team seats. For custom needs, contact enterprise sales.
 
 ---
@@ -256,8 +256,8 @@
 - Response: within 5 business days; approved refunds processed within 7-14 business days to original payment method
 - **Chargebacks:** Contact support BEFORE filing; most disputes resolved in under 48 hours; chargeback abuse → account closure and reporting to Ethoca/Verifi
 - EU right of withdrawal: 14-day right waived for digital content activated immediately (user consents at checkout)
-- Payment processor: Dodo Payments (PCI-DSS Level 1); descriptor "DODO * MEGSY AI"
-- Accepted payment methods (from Trust Center): Visa, Mastercard, American Express, JCB, UnionPay, Apple Pay, Google Pay, Amazon Pay, WeChat Pay
+- Payment processor: Kashier-hosted checkout; Megsy does not store card details
+- Accepted payment methods: card and mobile-wallet options presented by Kashier
 - Billing dispute email: support@megsyai.com (subject "Billing Dispute")
 
 ---
@@ -392,7 +392,7 @@
 - **Sanctioned jurisdictions (service not available):** Cuba, Iran, North Korea, Syria, and Crimea, Donetsk, Luhansk, Kherson, Zaporizhzhia regions of Ukraine
 - Screening: OFAC SDN, EU consolidated, UK OFSI, UN sanctions lists
 - **Security:** TLS 1.3 in transit, AES-256 at rest; OAuth 2.0, MFA available, SSO/SAML for enterprise; principle of least privilege; production access audited quarterly; annual penetration test; breach notification within 72 hours; daily encrypted backups, multi-region recovery
-- **Payments (Trust Center detail):** Dodo Payments PCI-DSS Level 1; accepted cards: Visa, Mastercard, American Express, JCB, UnionPay, Apple Pay, Google Pay, Amazon Pay, WeChat Pay; 3-D Secure 2 on eligible EU transactions
+- **Payments (Trust Center detail):** Kashier-hosted checkout; available card and mobile-wallet methods are shown by Kashier at checkout
 - **Accessibility:** WCAG 2.2 Level AA target; ADA Title III; European Accessibility Act (effective June 2025); compatible with NVDA, JAWS, VoiceOver, TalkBack; issues: accessibility@megsyai.com (response within 5 business days)
 - **EU sub-processors (Trust Center list):** Supabase (AWS, primarily eu-west), Cloudflare, OpenAI, Anthropic, Google AI, Fal.ai, Replicate, Eleven Labs, Stability AI, Resend/Postmark, PostHog (privacy-respecting), Sentry (no PII)
 - Default EU user data processed in EU regions; cross-border via SCCs, UK ITDA, EU-US Data Privacy Framework
@@ -407,7 +407,7 @@
 - Last updated: 19 May 2026
 - **Infrastructure & Hosting:** Lovable Cloud (Supabase) — managed Postgres, auth, object storage, edge functions (Europe/US); Cloudflare — CDN, DDoS, SSL; Vercel/Lovable Edge — static assets
 - **AI Model Providers:** Lovable AI Gateway (routing layer); OpenAI (text, image, audio); Anthropic (text); Google LLC (Gemini, Imagen, Veo — text, image, video); Fal.ai (image, video, lipsync); Replicate (third-party model inference); fireworks.ai (text inference); ElevenLabs (voice generation)
-- **Payments:** Dodo Payments (merchant of record, card processing, recurring billing, tax, payouts); Payoneer (supplemental global payouts, planned); NowPayments (crypto payments, planned)
+- **Payments:** Kashier-hosted card and mobile-wallet checkout for Megsy subscriptions
 - **Communications:** Resend (transactional email); Postmark/SendGrid (failover email); Telegram bot API (optional user notifications)
 - **Analytics & Monitoring:** PostHog (privacy-respecting analytics, self-host option); Sentry (error monitoring, PII-scrubbed)
 - **Code & Sandbox:** E2B (ephemeral isolated sandboxes for code execution); GitHub (optional Git integration)
@@ -516,4 +516,3 @@ Cuba, Iran, North Korea, Syria, Crimea (Ukraine), Donetsk (Ukraine), Luhansk (Uk
 | Affiliate program change notice | 14 days prior |
 | Privacy policy material change notice | 14 days prior |
 | Terms of Service material change notice | Reasonable notice in-app or email |
-

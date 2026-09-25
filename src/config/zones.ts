@@ -16,8 +16,8 @@ export interface ZoneConfig {
   defaultLanguage: string;
   /** AI dialect hint sent to backend prompts. */
   aiDialect: "standard" | "chinese";
-  /** Payment provider for this zone. */
-  paymentProvider: "stripe" | "alipay";
+  /** Payment provider for Megsy subscriptions. */
+  paymentProvider: "kashier";
   /** Brand color (HSL) for accents. */
   accentHsl: string;
   /** Short note shown under the name in the switcher. */
@@ -35,9 +35,9 @@ export const ZONES: Record<ZoneId, ZoneConfig> = {
     defaultCurrency: "USD",
     defaultLanguage: "en",
     aiDialect: "standard",
-    paymentProvider: "stripe",
+    paymentProvider: "kashier",
     accentHsl: "263 70% 60%",
-    description: "Global experience with Stripe checkout",
+    description: "Global experience with Kashier checkout",
   },
   china: {
     id: "china",
@@ -48,9 +48,9 @@ export const ZONES: Record<ZoneId, ZoneConfig> = {
     defaultCurrency: "CNY",
     defaultLanguage: "zh",
     aiDialect: "chinese",
-    paymentProvider: "alipay",
+    paymentProvider: "kashier",
     accentHsl: "0 72% 51%",
-    description: "Mandarin AI with Alipay and WeChat Pay",
+    description: "Mandarin AI with Kashier checkout",
     badge: "soon",
   },
 };

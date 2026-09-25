@@ -153,13 +153,11 @@ function PaymentGatewaySheetImpl({
 
   if (!open) return null;
 
-  // Respect the caller's order so the most relevant method comes first
-  // (local card before the international card on the Arabic site).
-  const visible = options
-    ? options
-        .map((id) => ROWS.find((row) => row.id === id))
-        .filter((row): row is (typeof ROWS)[number] => !!row)
-    : ROWS;
+  // Megsy subscriptions use Kashier only. Respect the caller's order while
+  // keeping the safe Kashier-only default for any future caller.
+  const visible = (options ?? ["local", "wallets"])
+    .map((id) => ROWS.find((row) => row.id === id))
+    .filter((row): row is (typeof ROWS)[number] => !!row);
 
   return (
     <div

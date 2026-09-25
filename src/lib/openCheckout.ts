@@ -9,6 +9,17 @@
 export function openCheckoutUrl(url: string): boolean {
   if (typeof window === "undefined" || !url) return false;
 
+  try {
+    const checkout = new URL(url, window.location.origin);
+    if (checkout.protocol !== "https:" || checkout.hostname !== "checkout.kashier.io") {
+      console.error("Blocked non-Kashier checkout URL");
+      return false;
+    }
+  } catch {
+    console.error("Blocked invalid checkout URL");
+    return false;
+  }
+
   const framed = window.top && window.top !== window;
   if (framed) {
     try {
